@@ -1,0 +1,212 @@
+%************************************************************************
+% Spezielle Macros für Folien
+% - viele Macros (renewcommand) überschreiben Macros aus ./macros.tex
+% - daher zuerst: input macros.tex
+%         danach: input macros-sl.tex
+%************************************************************************
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Spezielle Defs f"ur Folien
+
+\renewcommand{\nsl}[1]{}
+\renewcommand{\nl}{\\ \bigskip {\color{rwucyan} \rule{40mm}{0.5mm}}\\ \bigskip}
+%\renewcommand{\ind}[1]{\color{red}\bfseries #1}
+\renewcommand{\bff}{\bfseries\color{rwuviolet}  } % auf Folien bold und violett
+\renewcommand{\os}[1]{#1}                     % Text der nur auf Folien erscheint
+
+\renewcommand{\np}{\newpage}
+
+
+%%%%%%%%%%%%%%%%%%%% Farbdefinitionen %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\red}{\color{rwuviolet} }
+\definecolor{hellgelb}{cmyk}{0.05,0,0.4,0}
+\definecolor{dunkelgelb}{cmyk}{0.05,0.1,1,0.1}
+\definecolor{schwgelb}{cmyk}{0,0,1,0.1}
+\colorlet{headcol}{rwuviolet}
+\definecolor{blau}{rgb}{0,0,1}
+\definecolor{rot}{rgb}{1,0,0}
+\colorlet{hellblau}{rwuvioletlight!15}
+\colorlet{hellgruen}{rwucyan40!30}
+\colorlet{gruen}{rwucyandark}
+\renewcommand{\qboxcolor}{rwucyan40!35}
+\newcommand{\pagecol}{white}
+\newcommand{\qboxframecolor}{rwucyan}
+\setlength{\qboxwidth}{0.98\textwidth}
+\setlength{\fboxrule}{0.4mm}
+%\renewcommand{\bf}{\bfseries\color{magenta}  }
+\renewcommand{\bf}{{\color{rwuviolet}\bfseries }}
+\renewcommand{\un}{{\color{rwuviolet}\bfseries }}
+\renewcommand{\em}{\bfseries\color{gruen} }
+
+%%%%%%%%% eingerahmter Text %%%%%%
+\renewcommand{\tboxcolor}{hellgruen}
+
+%%%%%%% Makro f"ur umrandete Definitionen %%%%%
+\renewcommand{\defn}[2]{\noindent\fcolorbox{rwucyan}{rwucyan40!35}{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule
+}{              \vspace*{-3mm}
+                \begin{mydefn}
+                        #2      
+                        \label{def:#1}
+                 \end{mydefn}
+                \vspace*{-4mm}}}
+                \vspace*{8mm}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%---------------------------------------------------------------------- 
+% Makro f"ur umrandetes Corollar
+%---------------------------------------------------------------------- 
+\renewcommand{\coro}[2]{\textcolor{rwuviolet}{\begin{corollar}
+                        #2
+                        \label{cor:#1}
+                      \end{corollar}}}
+
+%---------------------------------------------------------------------- 
+% Makro f"ur Lemma
+%---------------------------------------------------------------------- 
+\renewcommand{\lemma}[2]{\textcolor{rwuviolet}{\begin{mylemma}
+                        #2
+                        \label{lem:#1}
+                      \end{mylemma}}}
+
+%---------------------------------------------------------------------- 
+% Makro f"ur Satz
+%---------------------------------------------------------------------- 
+\renewcommand{\satz}[2]{\noindent\fcolorbox{rwuviolet}{hellblau}{\parbox{\qboxwidth
+}{              \vspace*{-3mm}
+                        \begin{mysatz}
+                        #2
+                        \label{satz:#1}
+                      \end{mysatz}
+                \vspace*{-4mm}}}
+                \vspace*{4mm}}
+
+%---------------------------------------------------------------------- 
+% Makro für Beispiel
+%---------------------------------------------------------------------- 
+%\newcounter{example}
+%\newtheorem{example}{Beispiel}[chapter]
+\renewcommand{\exa}[1]{
+\noindent\fcolorbox{hellgruen}{hellgruen}{\parbox{\textwidth}{\vspace*{-3mm}
+                \begin{example}
+                        \sf #1
+                \end{example}
+                \vspace*{-2ex}}}\\[2ex]
+}
+%\newcommand{\longexa}[1]{
+\renewcommand{\exa}[1]{
+{\color{headcol}
+                \begin{example}
+                        \sf #1
+                \end{example}
+}
+}
+
+%%%%%%%%% für Programmtexte, siehe a. Ginf2 %%%%%%
+\renewcommand{\programmlist}[1]{\begin{quote}\colorbox{\tboxcolor}{\begin{tabular}{|@{\tt~}l|}\hline #1 \hline\end{tabular}}\end{quote}}
+
+%---------------------------------------------------------------------- 
+% Itemize
+%---------------------------------------------------------------------- 
+%%%%% item mit grünem Punkt
+\renewcommand{\ite}{\item[\textcolor{rwucyan}{$\bullet$~}]}
+\renewcommand{\itee}{\item[\textcolor{rwucyan}{$\circ$~}]}
+\renewcommand{\bi}{\begin{itemize}}
+\renewcommand{\ei}{\end{itemize}}
+\renewcommand{\itd}[1]{\item[\textcolor{headcol}{\bfseries #1~}]}
+\renewcommand{\bd}{\begin{description}}
+\renewcommand{\ed}{\end{description}}
+%%%%% item mit grünem Punkt nur für Folien (im Skript unsichtbar)
+\renewcommand{\itef}{\item[\textcolor{rwucyan}{$\bullet$~}]}
+\renewcommand{\iteef}{\item[\textcolor{rwucyan}{$\circ$~}]}
+\renewcommand{\bif}{\begin{itemize}}
+\renewcommand{\eif}{\end{itemize}}
+\renewcommand{\itdf}[1][]{\item[\textcolor{headcol}{#1~}]}
+\renewcommand{\bdf}{\begin{description}}
+\renewcommand{\edf}{\end{description}}
+
+%\input{amssym.def} \input{amssym.tex} % AMSTEX
+% ==========================================================================
+%                                               Globale Deklarationen
+% ==========================================================================
+
+%\renewcommand{\underline}[1]{\noindent{\bf #1}}
+
+%---------------------------------------------------------------------- 
+% damit die Underfull-Meldungen nicht mehr auftauchen
+%---------------------------------------------------------------------- 
+\hbadness = 10000
+\vbadness = 10000
+
+%---------------------------------------------------------------------- 
+% damit gleitobjekte auf der richtigen Seite erscheinen
+%---------------------------------------------------------------------- 
+\setcounter{totalnumber}{10}
+\setcounter{topnumber}{10}
+\setcounter{bottomnumber}{10}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.9}
+\renewcommand{\floatpagefraction}{0.9}
+
+%\renewcommand{\baselinestretch}{1.2}
+
+\renewcommand{\familydefault}{\sfdefault}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%               HEADINGS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\headsep 5mm
+%\pagestyle{fancyplain}
+% \renewcommand{\chaptermark}[1]{\markboth{#1}{#1}} % remember chapter title
+% \renewcommand{\chaptermark}[1]{\markboth{\thechapter~~#1}{}} % remember chaptertitle
+% \renewcommand{\sectionmark}[1]{\markright{\thesection~~#1}}
+                                                   % section number and title
+% \lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\rightmark}}
+% \rhead[\fancyplain{}{\leftmark}]{\fancyplain{}{\bfseries\thepage}}
+%\footskip 8mm
+%\cfoot{\rule{\textwidth}{0.1mm}\\\tiny Copyright \copyright  ~2001, W. Ertel}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%               PDF-Latex Demos
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\renewcommand{\demo}[2]{\fcolorbox{gruen}{hellgruen}{Demo:\pdflaunchlink{#1}{#2}}}
+\renewcommand{\demoneu}[2]{\fcolorbox{gruen}{hellgruen}{Demo:\href{run:#1}{#2}}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%               Überschriften
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \renewcommand{\chapter}[1]{\refstepcounter{chapter}\newpage
+%       \textcolor{headcol}{\begin{center}\Huge\bfseries
+%       \thechapter #1\end{center}}\addcontentsline{toc}{chapter}{#1}
+% }
+\renewcommand{\section}[1]{\refstepcounter{section}\newpage
+      \textcolor{headcol}{
+\centerline{\huge\bfseries\thesection~#1}\\[0.5ex]}\addcontentsline{toc}{section}{#1}}
+%\begin{center}\huge\bfseries\thesection~#1\end{center}}\addcontentsline{toc}{section}{#1}}
+\renewcommand{\subsection}[1]{\newpage 
+      \textcolor{headcol}{\centerline{\parbox{\textwidth}{\LARGE\bfseries #1}}}}
+\renewcommand{\subsubsection}[1]{\newpage
+      \textcolor{headcol}{\centerline{\parbox{\textwidth}{\Large\bfseries #1}}}}
+\renewcommand{\aufg}%%%%%%%%%%%% Aufgabe %%%%%%%%%%%%
+        {\refstepcounter{AufgNr}
+         \par {\bfseries\large Aufgabe \arabic{AufgNr}\\[0.5ex]}%
+         \setcounter{TeilaufgNr}{1}%
+        }
+
+
+\newcommand{\nopb}[1]{\enlargethispage{#1}}
+
+\renewcommand{\small}{\large}
+\renewcommand{\footnotesize}{\normalsize}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% TeX-master: t
+%%% End: 
+
+%%%%%%%%%%%%%%%%%%%% Code listings on slides %%%%%%%%%%%%%%%%%%%%%%%%
+\lstset{basicstyle=\fontsize{12}{13.4}\selectfont\ttfamily, numberstyle=\tiny}

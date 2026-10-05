@@ -1,0 +1,61 @@
+\documentclass[a4paper,12pt,twoside,openany]{book}
+\input{preamble}
+\usepackage[backref,colorlinks=true,pdfpagemode=UseNone]{hyperref}
+\hypersetup{linkcolor=rwuviolet,citecolor=rwucyandark,urlcolor=rwucyandark}
+
+% RWU look: violet headings, grey running head and page numbers
+\usepackage{titlesec}
+\titleformat{\chapter}[hang]{\sffamily\Huge\bfseries\color{rwuviolet}}{\thechapter}{0.6em}{}
+\titlespacing*{\chapter}{0pt}{0pt}{18pt}
+\titleformat*{\section}{\sffamily\Large\bfseries\color{rwuviolet}}
+\titleformat*{\subsection}{\sffamily\large\bfseries\color{rwucyandark}}
+\titleformat*{\subsubsection}{\sffamily\normalsize\bfseries\color{rwucyandark}}
+\usepackage{fancyhdr}
+\fancypagestyle{rwu}{%
+  \fancyhf{}%
+  \fancyhead[LE,RO]{\color{rwugray}\small\nouppercase{\leftmark}}%
+  \fancyfoot[LE,RO]{\color{rwugray}\small\thepage}%
+  \renewcommand{\headrulewidth}{0pt}}
+\fancypagestyle{plain}{%
+  \fancyhf{}%
+  \fancyfoot[LE,RO]{\color{rwugray}\small\thepage}%
+  \renewcommand{\headrulewidth}{0pt}}
+\renewcommand{\chaptermark}[1]{\markboth{\thechapter\ \ #1}{}}
+\textwidth 170mm
+\textheight 255mm
+\topmargin -20mm
+\headheight 15pt
+\evensidemargin -5mm
+\oddsidemargin -5mm
+\parindent 0mm
+\counterwithin{figure}{section}
+
+
+%*********************** div. Macropakete ******************************
+\excludeversion{lsgenv}
+\input ./mathmacros
+\input macros
+\renewcommand{\lsg}[1]{}
+
+\pagestyle{rwu}
+\renewcommand{\bi}{\begin{itemize}\itemsep 0ex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\bibliographystyle{unsrt}
+\nocite{*}
+
+\input{cover}
+
+\setcounter{tocdepth}{1}
+\tableofcontents
+
+\input{text.tex}
+
+
+\newpage
+\baselineskip 5mm
+\def\refname{Literatur}
+\bibliography{refs}
+\addcontentsline{toc}{chapter}{References}
+\end{document}

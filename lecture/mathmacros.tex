@@ -1,0 +1,507 @@
+%************************************************************************
+% Allgemeine Macros, insbesondere fr Skripten
+%************************************************************************
+
+\newlength{\qboxwidth}
+\setlength{\qboxwidth}{0.89\textwidth}
+\newcommand{\qboxcolor}{white}
+\newcommand{\tboxcolor}{white}
+
+\newcommand{\mycaption}[1]{\caption[]{\footnotesize #1}}
+\usepackage{color}
+\definecolor{hellgrau}{gray}{0.9}
+
+\usepackage{listings}
+\lstloadlanguages{C}
+\lstset{language=C,commentstyle=\color{rwugray}\scriptsize, extendedchars=true} 
+
+%---------------------------------------------------------------------- 
+% Makro f"ur Floatingpoint-Zahlen 
+\newcommand{\fl}{\mbox{fl}}
+
+%---------------------------------------------------------------------- 
+% Makro f"ur Mengenbuchstaben
+%---------------------------------------------------------------------- 
+\newcommand{\real}{{\mathbb{R}}}
+%\newcommand{\r}{{\mathbb{R}}}
+\newcommand{\realplus}{{\mathbb{R}}^+}
+\newcommand{\z}{{\mathbb{Z}}}
+\newcommand{\q}{{\mathbb{Q}}}
+\newcommand{\C}{{\mathbb{C}}}
+\newcommand{\nat}{{\mathbb{N}}}  
+\newcommand{\n}{{\mathbb{N}}}
+\newcommand{\myset}[1]{{\mathbb{#1}}}
+
+\newcommand{\nnull}{{\mathbb{N}_0}}
+\newcommand{\sigs}{\Sigma^{\ast}}
+
+\newcommand{\rn}{\real^n}
+
+\newcommand{\qed}{\mbox{}\hfill\mbox{$\box$}}
+\newcommand{\pp}{\vspace{1.9ex}}                                          
+\newcommand{\ind}[1]{#1}  %%% Index-Makro (Krypto-Buch) wird hier
+                          %%% nicht verwendet
+
+%\newcommand{\aufg}[1]{\subsubsection*{Aufgabe #1}}
+%\newcommand{\teilaufg}[1]{\subsubsection*{#1)}}
+%\newcommand{\teilaufg}[1]{\paragraph*{#1)}}
+\newcommand{\blatt}[1]{\begin{center}\vspace*{5mm}\LARGE\bf \"Ubungsblatt #1\end{center}}
+\newenvironment{alist}{\begin{list}{}{\labelsep 0mm \itemsep 0mm \parsep 0mm}}{\end{list}}
+\newenvironment{blist}{\begin{list}{}{\labelsep 0mm \itemsep 0mm \parsep 2mm}}{\end{list}}
+
+\newcommand{\abcitem}[1]{\item[\bf #1)\hspace*{4mm}]}
+\renewcommand{\d}[2]{{\partial #1 \over \partial #2}}
+\newcommand{\vect}[1]{\left( \begin{array}{c} #1 \end{array} \right)}
+\newcommand{\matr}[2]{\left( \begin{array}{#1} #2 \end{array} \right)}
+\newcommand{\bincoeff}[2]{\left(\rule{0mm}{0.5cm}\right.\!\!\!\!\begin{array}{c} #1 \\[-0.5ex] #2 \end{array} \!\!\!\!\left.\rule{0mm}{0.5cm} \right) }
+%---------------------------------------------------------------------- 
+% Makro f"ur 2x2 Matrix mit ()
+%---------------------------------------------------------------------- 
+\newcommand{\matrzwei}[4]{\left(\begin{array}{cc}#1&#2\\#3&#4\\\end{array}\right)}
+
+\newcommand{\degr}{\mbox{deg}}
+\newcommand{\lbr}[1]{\left\{ \begin{array}{cl} #1 \end{array} \right.}
+\newcommand{\grad}{\mbox{grad}}
+\newcommand{\rotation}{\mbox{rot}}
+\renewcommand{\div}{\mbox{div}}
+\newcommand{\condfunct}[5]{#1 = \left\{\begin{array}{cl}%
+                           #2 & \mbox{if } #3\\%
+                           #4 & \mbox{if } #5%
+             \end{array}%
+        \right.}
+\newcommand{\condfunctsonst}[4]{#1 = \left\{\begin{array}{cl}%
+                           #2 & \mbox{if } #3\\%
+                           #4 & \mbox{otherwise }%
+             \end{array}%
+        \right.}
+\newcommand{\condfunctiii}[7]{#1 = \left\{\begin{array}{cl}%
+                           #2 & \mbox{if } #3\\%
+                           #4 & \mbox{if } #5\\%
+                           #6 & \mbox{if } #7%
+             \end{array}%
+        \right.}
+\newcommand{\bm}[1]{\mbox{\boldmath $\displaystyle #1$}}
+\newcommand{\lr}[1]{\left( #1 \right)}
+\newcommand{\dfb}{differenzierbar }
+
+\newcommand{\eps}{\varepsilon}
+\newcommand{\aequi}{\quad\Leftrightarrow\quad}
+\newcommand{\gdw}{\aequi}
+\newcommand{\impl}{\quad\Rightarrow\quad}
+\newcommand{\bem}[1]{{\bf Remark: }#1}
+\newcommand{\halb}{\frac{1}{2}}
+
+
+%------------------------------------------------------------------------------
+%       Aufgaben für Übungsblätter
+%------------------------------------------------------------------------------
+
+\newcounter{AufgNr}
+\setcounter{AufgNr}{0}
+
+\newcounter{TeilaufgNr}
+
+
+\newcommand{\aufg}%%%%%%%%%%%% Aufgabe %%%%%%%%%%%%
+        {\refstepcounter{AufgNr}
+         \subsubsection*{Exercise \arabic{AufgNr}}%
+         \setcounter{TeilaufgNr}{1}%
+        }
+%----------------------------------------------------------------------
+% Env fr Aufgabe
+%----------------------------------------------------------------------
+\newenvironment{aufgenv}
+        {\refstepcounter{AufgNr}
+         \subsubsection*{Exercise \arabic{AufgNr}}%
+         \setcounter{TeilaufgNr}{1}%
+\vspace*{-1ex}
+        }{}
+\newcommand{\klaufg}[1]%%%%%%%%%%%% Aufgabe %%%%%%%%%%%%
+        {\refstepcounter{AufgNr}
+         \subsubsection*{Exercise \arabic{AufgNr} ~~~\mbox{\rm\footnotesize (#1)}}%
+         \setcounter{TeilaufgNr}{1}%
+        }
+\newcommand{\ta}%%%%%%%%%%%%% Teilaufgabe %%%%%%%%%%%%
+        {\item[\bf \alph{TeilaufgNr})\hspace*{4mm}]%
+        \refstepcounter{TeilaufgNr}%
+        }
+\newenvironment{talist}{\begin{list}{}%%%%%%%%%% Liste von Teilaufgaben %%%%%%
+        {\labelsep 0mm \itemsep 0mm \parsep 2mm}}{\end{list}}
+
+\newcommand{\lsg}[1]{\subsubsection*{L\"osung zu Exercise \arabic{AufgNr}} \setcounter{TeilaufgNr}{1} #1}
+%\renewcommand{\lsg}[1]{}
+\newcommand{\keinelsg}{}
+
+%------------------------------------------------------------------------------
+
+
+%---------------------------------------------------------------------- 
+% Makro zur Erzeugung eigener Bilder (ohne Figure Env.)
+%---------------------------------------------------------------------- 
+\newcommand{\mypic}[3]{\begin{center}
+                                \rule{0mm}{0mm}
+                                \epsfig{file=figures/#1,width=#2cm,height=#3cm}
+                            \end{center}}
+\newcommand{\pic}[2]{\epsfig{file=#1,width=#2\textwidth}}
+\newcommand{\picc}[2]{\begin{center}\includegraphics[width=#2\textwidth]{#1}\end{center}}
+\newcommand{\mypict}[1]{\begin{center}
+                                \rule{0mm}{0mm}
+                                \epsfig{#1}
+                            \end{center}}
+%---------------------------------------------------------------------- 
+% Makros zur Erzeugung eigener Abbildungen (mit Figure Env.)
+%---------------------------------------------------------------------- 
+\newcommand{\myfigure}[5]{\begin{figure}[htbp]
+                            \begin{center}
+                                \rule{0mm}{0mm}
+                                \epsfig{file=figures/#2,width=#3cm,height=#4cm}
+                            \end{center}
+                            \mycaption{#5. \label{#1}}
+                          \end{figure}}
+\newcommand{\mypsfigure}[3]{\begin{figure}[htbp]
+                            \begin{center}
+                                \rule{0mm}{0mm}
+                                \epsfig{#2}
+                            \end{center}
+                            \mycaption{#3. \label{#1}}
+                          \end{figure}}
+
+\newcommand{\myfig}[3]{\begin{figure}[htbp]
+                            \begin{center}
+                                \rule{0mm}{0mm}
+                                \epsfig{file=figures/#2}
+                            \end{center}
+                            \mycaption{#3. \label{#1}}
+                          \end{figure}}
+
+%---------------------------------------------------------------------- 
+% Makro zum Verweis auf eigene Abbildungen
+%---------------------------------------------------------------------- 
+\newcommand{\abb}[1]{Abb.~\ref{fig:#1}}
+
+%---------------------------------------------------------------------- 
+% Makro für Problem
+%---------------------------------------------------------------------- 
+\newcounter{problem}
+\newtheorem{problem}{Problem}
+\newcommand{\prob}[1]{\begin{problem}
+                        {\rm #1}
+                      \end{problem}}
+
+%---------------------------------------------------------------------- 
+% Makro für L\"osung
+%---------------------------------------------------------------------- 
+\newcounter{solutionthm}
+\newtheorem{solutionthm}{Solution}
+\newcommand{\sol}[1]{\begin{solutionthm}
+                        {\rm #1}
+                      \end{solutionthm}}
+
+%---------------------------------------------------------------------- 
+% Makro für Beispiel
+%---------------------------------------------------------------------- 
+\newcounter{example}
+\newtheorem{example}{Example}[chapter]
+\newcommand{\exa}[1]{\begin{example}
+                        {\rm #1}
+%                       \vspace*{3ex}
+                      \end{example}}
+
+%---------------------------------------------------------------------- 
+% Makro für umrandetes Corollar
+%---------------------------------------------------------------------- 
+\newcounter{corollar}
+\newtheorem{corollar}{Corollar}[section]
+\newcommand{\coro}[2]{\begin{corollar}
+                        \rm #2
+                        \label{def:#1}
+                      \end{corollar}}
+
+%---------------------------------------------------------------------- 
+% Makro für Lemma
+%---------------------------------------------------------------------- 
+\newcounter{mylemma}
+\newtheorem{mylemma}{Lemma}[chapter]
+\newcommand{\lemma}[2]{\begin{mylemma}
+                        \rm #2
+                        \label{lem:#1}
+                      \end{mylemma}}
+
+%---------------------------------------------------------------------- 
+% Makro für Satz
+%---------------------------------------------------------------------- 
+\newcounter{mysatz}
+\newtheorem{mysatz}{Rule}[chapter]
+\newcommand{\satz}[2]{\begin{mysatz}
+                        \rm #2
+                        \label{satz:#1}
+                      \end{mysatz}}
+
+%---------------------------------------------------------------------- 
+% Makro für umrandete Definitionen
+%---------------------------------------------------------------------- 
+\newcounter{definition}
+\newtheorem{mydefn}{Definition}[chapter]
+\newcommand{\defn}[2]{\vspace*{4mm}
+%% \refstepcounter{definition}
+\noindent
+{\fboxrule 0.4mm \fboxsep 2mm
+ \fcolorbox{rwucyan}{rwucyan40!35}{%
+   \begin{minipage}[c]{\dimexpr\linewidth-4mm-0.8mm\relax}
+        \begin{mydefn}
+                \rm #2
+                \label{def:#1}
+        \end{mydefn}
+   \end{minipage}}}\medskip}
+%---------------------------------------------------------------------- 
+% Makro für Deflist
+%---------------------------------------------------------------------- 
+\newenvironment{deflist}{\vspace*{1ex}\begin{list}{}
+   {\topsep 0em \itemindent -0.5em \leftmargin 1em \itemsep 0em \parsep 0.3em}
+}{\end{list}}
+\newcommand{\defit}{\item[$\bullet$]}
+
+%---------------------------------------------------------------------- 
+% Makros fr Beweis
+%---------------------------------------------------------------------- 
+\newenvironment{beweis}{%\vspace*{-3ex}
+\noindent{\bf Beweis: }}{\hfill\raisebox{-.1ex}{$\Box$}\\}
+\newenvironment{beweisobox}{\noindent{\bf Beweis: }}{}
+
+%% %---------------------------------------------------------------------- 
+%% % Makro für Beispiel
+%% %---------------------------------------------------------------------- 
+%% \newcounter{example}
+%% \newtheorem{example}{Example}[section]
+%% \newcommand{\exa}[1]{\begin{example}
+%%                         {\rm #1}
+%%                         \vspace*{3ex}
+%%                       \end{example}}
+%% 
+%% %---------------------------------------------------------------------- 
+%% % Makro für umrandetes Corollar
+%% %---------------------------------------------------------------------- 
+%% \newcounter{corollar}
+%% \newtheorem{corollar}{Corollar}
+%% \newcommand{\coro}[2]{\begin{corollar}
+%%                         #2
+%%                         \label{cor:#1}
+%%                       \end{corollar}}
+%% 
+%% %---------------------------------------------------------------------- 
+%% % Makro für Lemma
+%% %---------------------------------------------------------------------- 
+%% \newcounter{mylemma}
+%% \newtheorem{mylemma}{Lemma}
+%% \newcommand{\lemma}[2]{\begin{mylemma}
+%%                         #2
+%%                         \label{lem:#1}
+%%                       \end{mylemma}}
+%% 
+%% %---------------------------------------------------------------------- 
+%% % Makro für Satz
+%% %---------------------------------------------------------------------- 
+%% \newcounter{mysatz}
+%% \newtheorem{mysatz}{Rule}
+%% \newcommand{\satz}[2]{\fbox{\parbox{\textwidth}{\begin{mysatz}
+%%                         #2
+%%                         \label{satz:#1}
+%%                       \end{mysatz}}}\vspace*{4mm}
+%% }
+%% 
+%% %---------------------------------------------------------------------- 
+%% % Makros fr Beweis
+%% %---------------------------------------------------------------------- 
+%% \newenvironment{beweis}{\vspace*{-3ex}\noindent{\bf Beweis: }}{\hfill\raisebox{-.1ex}{$\Box$}\\}
+%% 
+%% %% %---------------------------------------------------------------------- 
+%% %% % Makro für umrandete Definitionen
+%% %% %---------------------------------------------------------------------- 
+%% \newcounter{definition}
+%% \newtheorem{definition}{Definition}
+%% \newcommand{\defn}[2]{\vspace*{4mm}
+%% \noindent 
+%% $\displaystyle \left\|
+%%                 \mbox{
+%%                 \begin{minipage}[c]{15.8cm} 
+%%                 \begin{definition}
+%%                         #2
+%%                         \label{def:#1}
+%%                  \end{definition}
+%%                 \end{minipage} }  \right. $ \\[2ex] }
+%% 
+%% %---------------------------------------------------------------------- 
+%% % Makro für Deflist
+%% %---------------------------------------------------------------------- 
+%% \newenvironment{deflist}{\vspace*{1ex}\begin{list}{}
+%%    {\topsep 0em \itemindent -0.5em \leftmargin 1em \itemsep 0em \parsep 0.3em}
+%% }{\end{list}}
+%% \newcommand{\defit}{\item[$\bullet$]}
+
+
+%%%%%%%%% eingerahmter Text %%%%%%
+\newcommand{\qbox}[2][0.9]{
+   \begin{center}
+        \fcolorbox{rwucyan}{\qboxcolor}{\parbox{#1\qboxwidth}{#2}}
+   \end{center}}
+
+%%%%%%%%% eingerahmter Text, ganze Breite %%%%%%
+\newcommand{\tbox}[1]{
+   \begin{center}
+        \fcolorbox{rwucyan}{\tboxcolor}{\parbox{\textwidth}{#1}}
+   \end{center}}
+
+
+%%%%%%%%% fr Programmtexte, siehe a. Ginf2 %%%%%%
+\newcommand{\programmlist}[1]{\begin{quote}\colorbox{\tboxcolor}{\begin{tabular}{|@{\tt~}l|}\hline #1 \hline\end{tabular}}\end{quote}}
+\newenvironment{programm}{\begin{quote}\begin{tabular}{|@{\tt~}l|}\hline}
+                         {\hline\end{tabular}\end{quote}}
+\newcommand{\programminput}[3][1]{%
+\sboxsep 0pt
+\sdim 2pt
+\centerline{\shabox{\colorbox{hellgrau}{~~~~\parbox{0.9\textwidth}{
+\listinginput[#1]{#2}{#3}
+}~~~~}}}}
+% Aufruf: \programminput[Inkrementzeilnr]{Startzeile}{Dateiname}
+
+
+%%%%%%%%% zwei Parboxen nebeneinander %%%%%%
+\newcommand{\hsplit}[4]{\parbox{#1\textwidth}{#2}\hfill\parbox{#3\textwidth}{#4}}
+\newcommand{\hsplitiii}[6]{\parbox[t]{#1\textwidth}{#2}\hfill\parbox[t]{#3\textwidth}{#4}\hfill\parbox[t]{#5\textwidth}{#6}}
+\newcommand{\hsplitiiii}[8]{\parbox[t]{#1\textwidth}{#2}\hfill\parbox[t]{#3\textwidth}{#4}\hfill\parbox[t]{#5\textwidth}{#6}\hfill\parbox[t]{#7\textwidth}{#8}}
+\newcommand{\hsplitiiig}[9]{\parbox[#2]{#1\textwidth}{#3}\hfill\parbox[#5]{#4\textwidth}{#6}\hfill\parbox[#8]{#7\textwidth}{#9}}
+\newcommand{\hsplitiiio}[6]{\parbox{#1\textwidth}{#2}\hfill\parbox{#3\textwidth}{#4}\hfill\parbox{#5\textwidth}{#6}}
+\newcommand{\hsplitt}[4]{\parbox[t]{#1\textwidth}{#2}\hfill\parbox[t]{#3\textwidth}{#4}}
+\newcommand{\hsplitg}[6]{\parbox[#2]{#1\textwidth}{#3}\hfill\parbox[#5]{#4\textwidth}{#6}}
+\newcommand{\hsplito}[4]{\parbox{#1\textwidth}{#2}\parbox{#3\textwidth}{#4}}
+\newcommand{\hsplitfig}[4]{\parbox{#1\textwidth}{#2}\hfill\parbox{#3\textwidth}{\epsfig{file=#4,width=#3\textwidth}}}
+\newcommand{\hsplitfigt}[4]{\parbox[t]{#1\textwidth}{#2}\hfill\parbox{#3\textwidth}{\parbox[t]{#3\textwidth}{\epsfig{file=#4,width=#3\textwidth}}}}
+\newcommand{\hsplitzweifig}[4]{\parbox{#1\textwidth}{\epsfig{file=#2,width=#1\textwidth}}\hfill\parbox{#3\textwidth}{\epsfig{file=#4,width=#3\textwidth}}}
+\newcommand{\hsplitdreifig}[6]{\parbox{#1\textwidth}{\epsfig{file=#2,width=#1\textwidth}}\hfill\parbox{#3\textwidth}{\epsfig{file=#4,width=#3\textwidth}}\hfill\parbox{#5\textwidth}{\epsfig{file=#6,width=#5\textwidth}}}
+\newcommand{\hsplitfigo}[5]{\parbox{#1\textwidth}{#2}{\hspace*{#3\textwidth}}\parbox{#4\textwidth}{\epsfig{file=#5,width=#4\textwidth}}}
+
+%%%%%%%%% aus DASI %%%%%%%%%%%%%%%%%%%%%%%%
+%\newcommand{\mod}{\bmod}
+\newcommand{\ggt}{\mathrm{ggT}}
+
+%----------------------------------------------------------------------------
+%----- bbo zeichnet einen Knoten und zwei Nachfolger
+%----- 1. Arg.: Label, 2. Arg.: linker Unterbaum, 3. Arg.: rechter Unterbaum
+\newcommand{\bbo}[3]{\begin{bundle}{#1} \chunk{#2} \chunk{#3}\end{bundle}}
+%----- tbo zeichnet einen Knoten und drei Nachfolger
+\newcommand{\tbo}[4]{\begin{bundle}{#1} \chunk{#2} \chunk{#3} \chunk{#4}\end{bundle}}
+%----- ubo zeichnet einen Knoten und einen Nachfolger
+\newcommand{\ubo}[2]{\begin{bundle}{#1} \chunk{#2} \end{bundle}}
+%----- blo zeichnet einen Blattknoten
+\newcommand{\blo}[1]{#1}
+
+%----------------------------------------------------------------------------
+%----- bb zeichnet einen Knoten und zwei Nachfolger mit Ovalbox
+%----- 1. Arg.: Label, 2. Arg.: linker Unterbaum, 3. Arg.: rechter Unterbaum
+\newcommand{\bb}[3]{\begin{bundle}{\ovalbox{#1}} \chunk{#2} \chunk{#3}\end{bundle}}
+%----- ub zeichnet einen Knoten und einen Nachfolger mit Ovalbox
+\newcommand{\ub}[2]{\begin{bundle}{\ovalbox{#1}} \chunk{#2} \end{bundle}}
+%----- bl zeichnet einen Blattknoten mit Ovalbox
+\newcommand{\bl}[1]{\ovalbox{#1}}
+
+%----------------------------------------------------------------------------
+%----- bbi zeichnet einen Knoten mit Index und zwei Nachfolger
+%----- 1. Arg.: Label, 2. Arg.: Index, 3.Arg.: li. Unterb., 4.Arg.: re. Unterb.
+\newcommand{\bbi}[4]{\begin{bundle}{$\,\,\ovalbox{#1}^{#2}$} \chunk{#3} \chunk{#4}\end{bundle}}
+%----- ubi zeichnet einen Knoten mit Index und einen Nachfolger
+\newcommand{\ubi}[3]{\begin{bundle}{$\,\,\ovalbox{#1}^{#2}$} \chunk{#3}\end{bundle}}
+%----- bli zeichnet einen Blattknoten mit Index
+\newcommand{\bli}[2]{$\,\,\ovalbox{#1}^{#2}$}
+
+%%%%%%%%%%%%%%%%%% fr formale Sprachen %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\va}[1]{$<\! \mbox{\it#1} \!>$}
+\newcommand{\var}[1]{<\! \mbox{\it#1} \!>}
+\renewcommand{\r}{\rightarrow}
+\newcommand{\R}{\Rightarrow}
+
+
+%%%%%%%%%%%%%%%%%% Macros v. Hr. Buck %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\un}[1]{{\bfseries #1}}
+%\newcommand{\rb}[1]{\raisebox{1.5ex}[-1.5ex]{#1}}
+\newcommand{\rb}[1]{#1}
+\newcommand{\mc}[1]{\multicolumn{1}{l|}{#1}}
+\newcommand{\mcc}[1]{\multicolumn{1}{c|}{#1}}                                  
+%\newcommand{\muc}[1]{\multicolumn{1}{l}{#1}}
+
+
+\newcommand{\engl}[1]{(engl.\ #1)}
+
+%---------------------------------------------------------------------- 
+% Itemize
+%---------------------------------------------------------------------- 
+\newcommand{\ite}{\item[$\bullet$~~]}
+\newcommand{\itee}{\item[$\circ$~~]}
+\newcommand{\iteee}{\item[$\ast$~~]}
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\itd}[1]{\item[#1]}
+\newcommand{\bd}{\begin{description}}
+\newcommand{\ed}{\end{description}}
+
+%*************** Euro Macros *****************************
+
+\newcommand\eur{{\sffamily C%
+    \makebox[0pt][l]{\kern-.70em\mbox{--}}%
+    \makebox[0pt][l]{\kern-.68em\raisebox{.25ex}{--}}}}
+
+
+
+%**************************************************************************
+% Macros die nur auf Folien etwas bewirken
+%**************************************************************************
+
+%%%%% item mit grnem Punkt nur fr Folien (im Skript unsichtbar)
+\newcommand{\itef}{}
+\newcommand{\iteef}{}
+\newcommand{\bif}{}
+\newcommand{\eif}{}
+\newcommand{\itdf}[1][]{}
+\newcommand{\bdf}{}
+\newcommand{\edf}{}
+\newcommand{\np}{}
+
+%%%%% Ausblenden von Text fr Folien
+\newcommand{\nsl}[1]{#1} % text nur im Skript (nicht auf Folien)
+\newcommand{\nl}{}      % Zeilenumbruch nur auf Folien
+\newcommand{\os}[1]{}   % text nur auf Folien
+\newcommand{\bff}{}      % Bold nur auf Folien
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%               PDF-Latex Demos
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\pdflaunch}[1] {\pdfpageattr{/AA << /O << /S /Launch /F (#1) >>>>}}
+\newcommand{\pdflaunchlink}[2]{%
+        \pdfstartlink attr{/Border [0 0 0]} user{/Subtype /Link /A << %
+        /S /Launch /F (#1) >>}%
+        \pdfliteral{0 1 0 0 k}%
+        {#2}\pdfliteral{0 0 0 1 k}\pdfendlink%
+        }
+\newcommand{\demo}[2]{Demo: #2}
+\newcommand{\demoneu}[2]{Demo: #2}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\fehltnoch}[1]{\bigskip\fbox{\parbox{\textwidth}{\typeout{!!!!!!!!!!!!!!!!!!!!!!!! fehltnoch: #1}\sf {\bfseries
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\\Fehlt noch:}\\ #1\\{\bfseries
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!}}}\bigskip}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%               Makros fr Sonderzeichen
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\pr}{\begin{math}
+ \rightarrow
+\end{math} }
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

@@ -1,0 +1,27 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% List of chapters. \chap{Title}{File}
+% "make ch CH=File" builds only one chapter (\onlychapter is set by make).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\providecommand{\chap}[2]{%
+  \ifdefined\onlychapter
+    \def\chapfile{#2}%
+    \ifx\chapfile\onlychapter \chapter{#1}\input{#2}%
+    \else \refstepcounter{chapter}\fi
+  \else
+    \chapter{#1}\input{#2}%
+  \fi}
+
+\chap{Basics}{Basics}
+\chap{Voltage and Current Sources}{Sources}
+\chap{Voltage References}{References}
+\chap{Bridge Circuits}{Bridges}
+\chap{Operational Amplifiers}{OpAmps}
+\chap{Active Filters}{Filters}
+\chap{Sample and Hold}{SampleHold}
+\chap{Analog-to-Digital Conversion}{ADC}
+\chap{From Sensor to Digital Value}{Capstone}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "docu"
+%%% End:

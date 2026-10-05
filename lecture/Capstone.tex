@@ -1,0 +1,585 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Chapter: From Sensor to Digital Value (capstone)
+% Falstad examples: examples/capstone (falstad/circuits/capstone.py)
+% All numbers in this chapter are checked by capstone.py.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{The Measurement Chain}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\nsl{This chapter puts all building blocks of the lecture together. We
+design a simple digital thermometer: a resistive temperature sensor
+measures \SIrange{0}{100}{\celsius}, and the result is shown as a 3-bit
+code on LEDs. Every stage of the chain is a circuit from an earlier
+chapter: the bridge from chapter~4, the instrumentation amplifier from
+chapter~5, the low-pass from chapter~6, the sample and hold from
+chapter~7 and the flash converter from chapter~8. The LED with its series
+resistor even goes back to chapter~1.
+\newline
+The design is done twice: on paper, with all calculations, and in
+Falstad, where the complete chain runs and can be checked against the
+paper values. The chapter is also the worked solution of last year's
+capstone task (exercise~\ref{ex:capstone}).\newpage}
+
+\begin{description}
+\item[{\rot\bf Five stages from sensor to code}]~\\[-\lblskip]
+\begin{center}
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[font=\sffamily\small,>=Stealth,x=1.15cm,
+	b/.style={draw,thick,rounded corners,minimum height=15mm,text width=27mm,align=center,font=\sffamily\footnotesize}]
+	\node[b,fill=rwucyan!10] (s1) at (0,0) {\textbf{1~Conditioning}\\bridge, INA,\\gain stage};
+	\node[b,fill=rwucyan!20] (s2) at (3.4,0) {\textbf{2~Anti-aliasing}\\low-pass\\$f_c=\SI{2.34}{\hertz}$};
+	\node[b,fill=rwuviolet!12] (s3) at (6.8,0) {\textbf{3 Sample \& Hold}\\$f_s=\SI{5}{\hertz}$};
+	\node[b,fill=rwuviolet!22] (s4) at (10.2,0) {\textbf{4~Flash ADC}\\7~comparators,\\ladder};
+	\node[b,fill=gray!12] (s5) at (13.6,0) {\textbf{5~Encoder \&}\\\textbf{Display}\\10~LEDs};
+	\node[left=6mm of s1,align=center] (t) {Pt100\\\SIrange{0}{100}{\celsius}};
+	\draw[->,thick] (t) -- (s1);
+	\draw[->,thick] (s1) -- node[above,font=\sffamily\scriptsize]{0..4 V} (s2);
+	\draw[->,thick] (s2) -- (s3);
+	\draw[->,thick] (s3) -- node[above,font=\sffamily\scriptsize]{held} (s4);
+	\draw[->,thick] (s4) -- node[above,font=\sffamily\scriptsize]{$C_1..C_7$} (s5);
+	\node[below=3mm of s5,font=\sffamily\scriptsize] {$B_2B_1B_0$};
+	\node[draw,thick,dashed,fill=yellow!15,align=center,font=\sffamily\scriptsize] (ref) at (6.8,-2.3)
+		{reference \SI{4.00}{\volt}: bridge excitation and ladder (ratiometric)};
+	\draw[->,dashed] (ref) -| (s1);
+	\draw[->,dashed] (ref) -| (s4);
+\end{tikzpicture}}
+\end{center}
+\bi
+	\ite requirement: \SIrange{0}{100}{\celsius} $\rightarrow$ \SIrange{0}{4.00}{\volt} $\rightarrow$ code 000 \ldots 111
+	\ite \SI{4}{\volt} full scale makes the step size round: $\LSB = \SI{4}{\volt}/2^3 = \SI{0.5}{\volt}$ $\widehat{=}$ \SI{12.5}{\celsius}
+	\ite interference: \SI{50}{\hertz}, \SI{5}{\milli\volt} in series with the sensor (overhead lamps)
+\ei
+\os{\newpage}
+
+\item[{\rot\bf Specification and design values}]~\\[-\lblskip]
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Quantity} & \textbf{Requirement} & \textbf{Design value} \\
+\midrule
+sensor & resistive, slider in Falstad & Pt100, \SIrange{100}{138.5}{\ohm} \\
+sensor current & $\leq \SI{1}{\milli\ampere}$ & \SIrange{1.000}{0.990}{\milli\ampere} \\
+full scale & \SI{0}{\volt} \ldots \SI{4.00}{\volt} & $G = 10 \cdot 10.76 = 107.6$ \\
+gain per stage & $< 100$ & 1, 10, 10.76 \\
+anti-aliasing & $f_c \approx \SI{2.5}{\hertz}$ & \SI{6.8}{\kilo\ohm}, \SI{10}{\micro\farad}: \SI{2.34}{\hertz} \\
+sampling & $f_s = \SI{5}{\hertz}$ & window \SI{20}{\milli\second}, $C_H = \SI{1}{\micro\farad}$ \\
+ADC & 3 bit, LSB \SI{0.5}{\volt} & $8\times\SI{1}{\kilo\ohm}$, 7 comparators \\
+display & LED + resistor & $10\times$ (LED + \SI{330}{\ohm}), \SI{9.8}{\milli\ampere} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\falstad{capstone}
+\os{\newpage}
+\end{description}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Stage 1: Signal Conditioning}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\nsl{The sensor is a Pt100 platinum resistor with
+$R(T) = R_0\,(1+\alpha T)$, $R_0=\SI{100}{\ohm}$,
+$\alpha = \SI{3.85e-3}{\per\kelvin}$, so it changes from \SI{100}{\ohm} at
+\SI{0}{\celsius} to \SI{138.5}{\ohm} at \SI{100}{\celsius}. We feed the bridge
+from the same \SI{4.00}{\volt} reference that later supplies the ADC ladder.
+If the reference is \SI{1}{\percent} too high, the bridge output and all
+thresholds of the converter are \SI{1}{\percent} too high as well, and the
+code does not change: the measurement is \emph{ratiometric}. The reference
+only needs to be stable while it is shared, not accurate.\newpage}
+
+\begin{description}
+\item[{\rot\bf Bridge design}]~\\[-\lblskip]
+\begin{center}
+\begin{circuitikz}[scale=0.85, transform shape]
+  \draw (0,4) node[above]{$\Vref = \SI{4.00}{\volt}$} -- (3,4);
+  \draw (0,4) to[R, l_=$R_1{=}\SI{3.9}{\kilo\ohm}$] (0,2) node[circ]{} node[left]{$V_S$}
+        to[thR, l_=Pt100] (0,0.5)
+        to[sV, l_=\SI{5}{\milli\volt}\,\SI{50}{\hertz}] (0,-1) node[ground]{};
+  \draw (3,4) to[R, l=$R_3{=}\SI{3.9}{\kilo\ohm}$] (3,2) node[circ]{} node[right]{$V_R$}
+        to[R, l=$R_4{=}\SI{100}{\ohm}$] (3,-1) node[ground]{};
+  \draw (0,2) to[open, v^>=$V_{BR}$] (3,2);
+\end{circuitikz}
+\end{center}
+\bi
+	\ite sensor current $I_S = \Vref/(R_1+R) = \SI{4}{\volt}/\SI{4000}{\ohm} = \SI{1.000}{\milli\ampere}$ at \SI{0}{\celsius} (\SI{0.990}{\milli\ampere} at \SI{100}{\celsius})
+	\ite balanced at \SI{0}{\celsius}: $R_4 = R(\SI{0}{\celsius})$, so $V_{BR}=0$
+	\ite $V_{BR}(T) = \Vref\left(\frac{R(T)}{R_1+R(T)} - \frac{R_4}{R_3+R_4}\right)$,
+	\quad $V_{BR}(\SI{100}{\celsius}) = \SI{37.18}{\milli\volt}$
+\ei
+\nsl{The bridge output is not exactly linear in $T$, because the sensor
+current falls slightly with rising $R$. With $R_1 = 39\,R_0$ the error is
+small: at \SI{50}{\celsius} the output is \SI{0.09}{\milli\volt} higher than
+the straight line, \SI{0.25}{\percent} of full scale, far below one LSB
+(\SI{12.5}{\percent}). A larger $R_1$ would reduce it further, but also the
+signal.}
+\os{\newpage}
+
+\item[{\rot\bf Instrumentation amplifier and gain stage}]~\\[-\lblskip]
+\begin{center}
+\begin{circuitikz}[scale=0.72, transform shape]
+  % buffers: V_R on top (to the inverting side), V_S below
+  \node[op amp, noinv input up] (b1) at (1.2,3) {};
+  \draw (b1.+) to[short,-o] ++(-0.6,0) node[left]{$V_R$};
+  \draw (b1.-) -- ++(0,-0.6) -| (b1.out);
+  \node[op amp, noinv input up] (b2) at (1.2,-0.6) {};
+  \draw (b2.+) to[short,-o] ++(-0.6,0) node[left]{$V_S$};
+  \draw (b2.-) -- ++(0,-0.6) -| (b2.out);
+  % difference amplifier, G1 = 10
+  \node[op amp] (da) at (7,1.2) {};
+  \draw (b1.out) -- ++(0.4,0) |- ($(da.-)+(-2.4,0)$) to[R, l=\SI{10}{\kilo\ohm}] (da.-);
+  \draw (b2.out) -- ++(0.4,0) |- ($(da.+)+(-2.4,0)$) to[R, l_=\SI{10}{\kilo\ohm}] (da.+);
+  \draw ($(da.-)+(-0.4,0)$) node[circ]{} -- ++(0,1.2) coordinate(t)
+        to[R, l=\SI{100}{\kilo\ohm}] (t -| da.out) -- (da.out);
+  \draw ($(da.+)+(-0.4,0)$) node[circ]{} to[R, l=\SI{100}{\kilo\ohm}] ++(0,-1.8) node[ground]{};
+  % gain stage, G2 = 10.76
+  \node[op amp, noinv input up, anchor=+] (gs) at ($(da.out)+(1.8,0)$) {};
+  \draw (da.out) -- (gs.+) node[pos=0.4,above]{\scriptsize $V_\mathrm{DIFF}$};
+  \draw (gs.-) -- ++(0,-0.9) coordinate(m) to[R, l_=\SI{10}{\kilo\ohm}] ++(0,-1.6) node[ground]{};
+  \draw (m) node[circ]{} to[R, l_=\SI{97.6}{\kilo\ohm}] ++(2.6,0) coordinate(o2) -- (o2 |- gs.out);
+  \draw (gs.out) -- (o2 |- gs.out) node[circ]{} to[short,-o] ++(0.7,0) node[right]{$V_\mathrm{COND}$};
+\end{circuitikz}
+\end{center}
+\bi
+	\ite buffers: input current zero, the bridge is not loaded
+	\ite difference amplifier: $V_\mathrm{DIFF} = \frac{\SI{100}{\kilo\ohm}}{\SI{10}{\kilo\ohm}}(V_S - V_R) = 10\,V_{BR}$
+	\ite gain stage: $G_2 = 1 + \frac{\SI{97.6}{\kilo\ohm}}{\SI{10}{\kilo\ohm}} = 10.76$
+\ei
+\os{\newpage}
+
+\item[{\rot\bf Gain: how much, and in how many stages?}]~\\[-\lblskip]
+\bi
+	\ite required total gain $G = \SI{4.00}{\volt}/\SI{37.18}{\milli\volt} = 107.6$
+	\ite split: $G_1 = 10$ (difference amplifier), $G_2 = 4.00/(10 \cdot 0.03718) = 10.758$
+	\itee E96: $R_F = \SI{97.6}{\kilo\ohm}$ $\Rightarrow$ $G_2 = 10.76$, full scale \SI{4.0005}{\volt}
+	\itee in hardware: $R_F = \SI{91}{\kilo\ohm} + \SI{10}{\kilo\ohm}$ trimmer, adjusted at \SI{100}{\celsius}
+	\ite finite open-loop gain $A = 10^5$: relative gain error $\approx G/A$
+	\itee one stage $G = 107.6$: \SI{0.11}{\percent}; two stages: $2 \times \SI{0.01}{\percent}$
+	\itee a single stage with $G > 1000$ would lose more than \SI{1}{\percent}: keep $G < 100$ per stage
+\ei
+\keyeq{Conditioning}{$\displaystyle V_\mathrm{COND} = G_1 G_2 \, \Vref\left(\frac{R(T)}{R_1+R(T)}-\frac{R_4}{R_3+R_4}\right)$,\quad $G_1G_2 = 107.6$}
+\nsl{Splitting the gain over two stages has a second advantage: the zero
+point is set by the bridge ($R_4$) and the span by one resistor ($R_F$).
+The two adjustments do not influence each other, so the trimming procedure
+is simple: set the sensor to \SI{100}{\ohm} and check \SI{0}{\volt}, then set
+it to \SI{138.5}{\ohm} and adjust $R_F$ for \SI{4.00}{\volt}.}
+\os{\newpage}
+\end{description}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Stage 2: Anti-Aliasing}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\nsl{The temperature changes slowly, so five samples per second are
+plenty. The sampling theorem then limits the usable bandwidth to
+$f_s/2 = \SI{2.5}{\hertz}$. Everything above this frequency must be removed
+\emph{before} the sampler, because after sampling it can no longer be
+distinguished from a real signal. The \SI{50}{\hertz} interference is the
+dangerous part: after the gain of 107.6 it has an amplitude of about half
+a volt, one full LSB.\newpage}
+
+\begin{description}
+\item[{\rot\bf Where does the 50\,Hz go?}]~\\[-\lblskip]
+\bi
+	\ite sampling with $f_s$ folds a frequency $f$ to $f_\mathrm{alias} = |f - k f_s|$ (nearest $k$)
+	\ite $f = \SI{50}{\hertz}$, $f_s = \SI{5}{\hertz}$: $|50 - 10\cdot 5| = \SI{0}{\hertz}$
+	\itee every sample sees the interference at the same phase
+	\itee the result is a \textbf{constant offset}: nothing on the scope looks wrong
+	\ite amplitude at $V_\mathrm{COND}$: $\SI{5}{\milli\volt}\cdot\frac{R_1}{R_1+R}\cdot 107.6 = \SI{0.52}{\volt}$ (about 1 LSB)
+\ei
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[width=0.8\textwidth,height=38mm,xmin=0,xmax=0.42,ymin=-1.3,ymax=1.3,
+	xlabel={$t$ / s},ytick={-1,0,1},xtick={0,0.1,0.2,0.3,0.4},
+	xticklabel style={/pgf/number format/fixed},axis lines=left,font=\scriptsize]
+	\addplot[rwucyan,samples=800,domain=0:0.42] {cos(deg(2*pi*50*x))};
+	\addplot[rwuviolet,only marks,mark=*,mark size=1.6pt] coordinates {(0.02,1) (0.22,1) (0.42,1)};
+	\addplot[rwuviolet,thick,dashed,domain=0:0.42] {1};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+\os{\newpage}
+
+\item[{\rot\bf Anti-aliasing low-pass}]~\\[-\lblskip]
+\begin{center}
+\begin{circuitikz}[scale=0.85, transform shape]
+  \draw (0,0) node[left]{$V_\mathrm{COND}$} to[short,o-] (0.3,0) to[R, l=\SI{6.8}{\kilo\ohm}] (2.5,0) coordinate(f)
+        to[C, l=\SI{10}{\micro\farad}] (2.5,-1.8) node[ground]{};
+  \draw (4,-0.48) node[op amp, noinv input up, anchor=+] (lp) {};
+  \draw (f) -- (lp.+);
+  \draw (lp.-) |- ++(0.5,-0.9) -| (lp.out);
+  \draw (lp.out) to[short,-o] ++(0.6,0) node[right]{$V_\mathrm{AA}$};
+\end{circuitikz}
+\end{center}
+\bi
+	\ite $f_c = \frac{1}{2\pi RC} = \frac{1}{2\pi\cdot\SI{6.8}{\kilo\ohm}\cdot\SI{10}{\micro\farad}} = \SI{2.34}{\hertz} \leq f_s/2$
+	\ite at \SI{50}{\hertz}: $|H| = 1/\sqrt{1+(50/2.34)^2} = 0.047$ ($-\SI{26.6}{\dB}$)
+	\ite residual offset: $\SI{0.52}{\volt}\cdot 0.047 = \SI{25}{\milli\volt} < \LSB/2 = \SI{250}{\milli\volt}$
+	\ite the follower decouples the RC network from the S\&H input
+\ei
+\nsl{For 3 bits a first-order filter is sufficient. For a 10-bit converter
+($\LSB/2 = \SI{2}{\milli\volt}$) the residual \SI{25}{\milli\volt} would be
+twelve times too large; a second- or third-order filter (chapter~6), a higher
+sampling rate followed by digital averaging, or a sampling rate that is
+\emph{not} a sub-multiple of \SI{50}{\hertz} would then be needed.}
+\designcard{Nyquist \& anti-aliasing (capstone values)}{%
+$f_s = \SI{5}{\hertz}$ $\Rightarrow$ bandwidth $\leq \SI{2.5}{\hertz}$;
+\quad $f_\mathrm{alias} = |f - k f_s|$; \quad
+$f_c = 1/(2\pi RC) \leq f_s/2$; \quad residual $= \hat v\,/\sqrt{1+(f/f_c)^2}$ must stay $< \LSB/2$.}
+\os{\newpage}
+\end{description}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Stage 3: Sample and Hold}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\nsl{The flash converter is fast and would not strictly need a sample and
+hold. We use one anyway, because it defines the sampling instant: the
+input of the converter changes only once per sampling period, so the LEDs
+show a stable code, and the aliasing experiment becomes visible. The
+circuit is the buffered S\&H of chapter~7.\newpage}
+
+\begin{description}
+\item[{\rot\bf Buffered sample and hold}]~\\[-\lblskip]
+\begin{center}
+\begin{circuitikz}[scale=0.8, transform shape]
+  \draw (0,-0.48) node[op amp, noinv input up, anchor=+] (i) {};
+  \draw (i.-) |- ++(0.5,-0.9) -| (i.out);
+  \draw (i.+) to[short,-o] ++(-0.5,0) node[left]{$V_\mathrm{AA}$};
+  \draw (i.out) to[nos, l={CLK}, a={FET switch}] ++(2.2,0) coordinate(h)
+        to[C, l=$C_H$] ++(0,-1.8) node[ground]{};
+  \draw (h) -- ++(1.2,0) coordinate(hh);
+  \draw (hh) ++(0.0,0) node[op amp, noinv input up, anchor=+] (o) {};
+  \draw (o.-) |- ++(0.5,-0.9) -| (o.out);
+  \draw (o.out) to[short,-o] ++(0.5,0) node[right]{$V_\mathrm{HOLD}$};
+\end{circuitikz}
+\end{center}
+\bi
+	\ite clock \SI{5}{\hertz}, duty \SI{10}{\percent}: switch closed for \SI{20}{\milli\second} (track), open for \SI{180}{\milli\second} (hold)
+	\ite input buffer: charges $C_H$ quickly; output buffer: no load on $C_H$
+\ei
+\os{\newpage}
+
+\item[{\rot\bf Choosing the hold capacitor}]~\\[-\lblskip]
+\bi
+	\ite \textbf{charging:} $\tau = R_\mathrm{on} C_H = \SI{20}{\ohm}\cdot\SI{1}{\micro\farad} = \SI{20}{\micro\second}$
+	\itee settle to $\LSB/2$ of 3 bits: $t = \tau\ln 2^{4} = 2.8\,\tau = \SI{55}{\micro\second} \ll \SI{20}{\milli\second}$
+	\ite \textbf{droop:} leakage $I_L = \SI{1}{\nano\ampere}$ (switch + buffer input)
+	\itee $\Delta V = I_L\, t_\mathrm{hold}/C_H = \SI{1}{\nano\ampere}\cdot\SI{0.18}{\second}/\SI{1}{\micro\farad} = \SI{0.18}{\milli\volt}$
+	\ite both limits leave a wide range: \SI{10}{\nano\farad} \ldots \SI{100}{\micro\farad} would work
+	\itee choose a film capacitor with low leakage and dielectric absorption: $C_H = \SI{1}{\micro\farad}$
+\ei
+\nsl{In hardware a small resistor (e.g.\ \SI{1}{\kilo\ohm}, as in the
+examples of chapter~7) is usually put in series with the switch: it limits
+the charging current that the input buffer must deliver and isolates the
+buffer from the capacitive load. Then $\tau = \SI{1.02}{\milli\second}$
+and settling to $\LSB/2$ takes \SI{2.8}{\milli\second}, still well inside
+the window. The limits are far apart because the signal is slow and the
+resolution low. They move together quickly in a fast, high-resolution
+system: a 12-bit converter sampling at \SI{1}{\mega\hertz} has a track time
+of a few hundred nanoseconds and needs settling to $2^{-13}$, which is why
+real S\&H stages use picofarad capacitors and low-resistance switches.}
+\os{\newpage}
+\end{description}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Stages 4 and 5: Flash ADC, Encoder and Display}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\nsl{The held voltage is compared with seven thresholds at once. The
+thresholds come from a ladder of eight equal resistors across the
+\SI{4.00}{\volt} reference. Each comparator answers one question, ``is
+the input above $k \cdot \SI{0.5}{\volt}$?'', and together they form a
+thermometer code: all comparators below the input voltage output 1, all
+above output 0. An encoder turns the seven bits into the 3-bit binary
+number.\newpage}
+
+\begin{description}
+\item[{\rot\bf Reference ladder and comparators}]~\\[-\lblskip]
+\begin{center}
+\begin{circuitikz}[scale=0.62, transform shape]
+  \draw (0,6) node[above]{\SI{4.00}{\volt}} to[R, l_=\SI{1}{\kilo\ohm}] (0,4.5) coordinate(t7)
+        to[R, l_=\SI{1}{\kilo\ohm}] (0,3) coordinate(t6);
+  \draw[dashed] (0,3) -- (0,1.5);
+  \draw (0,1.5) coordinate(t1x) to[R, l_=\SI{1}{\kilo\ohm}] (0,0) coordinate(t1)
+        to[R, l_=\SI{1}{\kilo\ohm}] (0,-1.5) node[ground]{};
+  \foreach \t/\k/\v in {t7/7/3.5, t6/6/3.0, t1/1/0.5} {
+    \draw (\t) node[circ]{} -- ++(2.2,0) coordinate(m\k);
+    \draw (m\k) ++(1.2,0.48) node[op amp, noinv input up] (c\k) {};
+    \draw (m\k) -- (c\k.-);
+    \draw (c\k.+) -- ++(-0.4,0) node[left]{\scriptsize $V_\mathrm{HOLD}$};
+    \draw (c\k.out) to[short,-o] ++(0.5,0) node[right]{$C_\k$};
+    \node[left] at (\t) {\scriptsize \SI{\v}{\volt}};
+  }
+\end{circuitikz}
+\end{center}
+\bi
+	\ite ladder current $\SI{4}{\volt}/\SI{8}{\kilo\ohm} = \SI{0.5}{\milli\ampere}$; comparator inputs draw no current
+	\ite $C_k = 1$ if $V_\mathrm{HOLD} > k\cdot\SI{0.5}{\volt}$; the number of ones is the level 0\ldots7
+\ei
+\os{\newpage}
+
+\item[{\rot\bf Quantization and encoder}]~\\[-\lblskip]
+\begin{center}
+\small
+\begin{tabular}{cc|ccccccc|ccc}
+\toprule
+$V_\mathrm{HOLD}$ / V & level & $C_7$ & $C_6$ & $C_5$ & $C_4$ & $C_3$ & $C_2$ & $C_1$ & $B_2$ & $B_1$ & $B_0$ \\
+\midrule
+0.0--0.5 & 0 & 0&0&0&0&0&0&0 & 0&0&0 \\
+0.5--1.0 & 1 & 0&0&0&0&0&0&1 & 0&0&1 \\
+1.0--1.5 & 2 & 0&0&0&0&0&1&1 & 0&1&0 \\
+1.5--2.0 & 3 & 0&0&0&0&1&1&1 & 0&1&1 \\
+2.0--2.5 & 4 & 0&0&0&1&1&1&1 & 1&0&0 \\
+2.5--3.0 & 5 & 0&0&1&1&1&1&1 & 1&0&1 \\
+3.0--3.5 & 6 & 0&1&1&1&1&1&1 & 1&1&0 \\
+3.5--4.0 & 7 & 1&1&1&1&1&1&1 & 1&1&1 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\bi
+	\ite $B_2 = C_4$ \quad (level $\geq 4$)
+	\ite $B_1 = C_2\overline{C_4} + C_6$ \quad (levels 2, 3, 6, 7)
+	\ite $B_0 = C_1\overline{C_2} + C_3\overline{C_4} + C_5\overline{C_6} + C_7$ \quad (odd levels: the edge of the thermometer is at an odd position)
+\ei
+\os{\newpage}
+
+\item[{\rot\bf Display}]~\\[-\lblskip]
+\bi
+	\ite 7 red LEDs from $C_1\ldots C_7$: bar graph, a thermometer you can read without decoding
+	\ite 3 green LEDs from $B_2B_1B_0$: the binary result
+	\ite each LED with its own series resistor (chapter~1), driven by a \SI{5}{\volt} logic output:
+	$R = \frac{\SI{5}{\volt}-V_F}{I_F} = \frac{\SI{5}{\volt}-\SI{1.8}{\volt}}{\SI{10}{\milli\ampere}} = \SI{320}{\ohm}$ $\rightarrow$ E12: \SI{330}{\ohm}
+	\itee Falstad: $I_F = \SI{9.8}{\milli\ampere}$, $V_F = \SI{1.78}{\volt}$
+	\ite never one common resistor for several LEDs: the current would depend on how many are on
+\ei
+\os{\newpage}
+\end{description}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{The Complete Chain in Falstad}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\nsl{The Falstad model contains all five stages in labelled boxes. The
+stages are connected with labeled nodes (\texttt{VCOND}, \texttt{VAA},
+\texttt{VHOLD}, \texttt{C1}\ldots\texttt{C7}, \texttt{B0}\ldots\texttt{B2});
+nodes with the same name are connected, which keeps the drawing readable.
+The sensor resistance is set with the slider ``Sensor R''. The first scope
+shows the filtered signal and the held staircase, the second the
+conditioned signal and the held value.\newpage}
+
+\begin{description}
+\item[{\rot\bf Using the model}]~\\[-\lblskip]
+\bi
+	\ite open \falstad{capstone}
+	\ite move the slider from \SI{100}{\ohm} to \SI{138.5}{\ohm}: the bar graph fills up, the binary LEDs count
+	\ite hover over a label to read its voltage; the held value changes every \SI{200}{\milli\second}
+	\ite after a slider step, wait about \SI{0.5}{\second}: the low-pass needs $5\tau = 5\cdot\SI{68}{\milli\second}$
+\ei
+\os{\newpage}
+
+\item[{\rot\bf Verification table}]~\\[-\lblskip]
+\nsl{For each test point the sensor resistance is computed from the
+conditioning equation so that $V_\mathrm{COND}$ lies in the centre of a code
+bin. The ``Falstad'' columns are the values of the simulation (with the
+\SI{50}{\hertz} interference switched on) just before the next sample.}
+\begin{center}
+\begin{tabular}{rrrrcc}
+\toprule
+$T$ / \si{\celsius} & $R$ / \si{\ohm} & $V_\mathrm{COND}$ target & $V_\mathrm{HOLD}$ Falstad & code expected & code Falstad \\
+\midrule
+ 6.2 & 102.38 & \SI{0.25}{\volt} & \SI{0.251}{\volt} & 000 & 000 \\
+18.6 & 107.16 & \SI{0.75}{\volt} & \SI{0.751}{\volt} & 001 & 001 \\
+43.5 & 116.75 & \SI{1.75}{\volt} & \SI{1.749}{\volt} & 011 & 011 \\
+56.0 & 121.56 & \SI{2.25}{\volt} & \SI{2.250}{\volt} & 100 & 100 \\
+81.1 & 131.22 & \SI{3.25}{\volt} & \SI{3.249}{\volt} & 110 & 110 \\
+93.7 & 136.07 & \SI{3.75}{\volt} & \SI{3.750}{\volt} & 111 & 111 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\bi
+	\ite the temperatures differ slightly from the linear mapping \SI{25}{\celsius\per\volt} (6, 19, 44, 56, 81, \SI{94}{\celsius}) because of the bridge nonlinearity
+\ei
+\os{\newpage}
+
+\item[{\rot\bf The aliasing experiment}]~\\[-\lblskip]
+\bi
+	\ite \falstad{capstone_nofilter}: the S\&H takes $V_\mathrm{COND}$ directly
+	\ite $V_\mathrm{COND}$ carries \SI{0.52}{\volt} of \SI{50}{\hertz}; the S\&H always samples at the same phase
+\ei
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+ & $V_\mathrm{COND}$ (DC) & $V_\mathrm{HOLD}$ & code \\
+\midrule
+without filter & \SI{1.75}{\volt} & \SI{2.27}{\volt} & 100 (wrong) \\
+without filter & \SI{0.25}{\volt} & \SI{0.77}{\volt} & 001 (wrong) \\
+with filter & \SI{1.75}{\volt} & \SI{1.75}{\volt} & 011 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\bi
+	\ite without the filter the held value is a clean staircase, just \SI{0.52}{\volt} too high: one full code too high
+	\ite the size of the offset depends on the phase between mains and sampling clock (here the worst case)
+\ei
+\os{\newpage}
+\end{description}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Exercises}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\exercise{From sensor to digital value (capstone task 2025/26)}\label{ex:capstone}
+Build a complete data-acquisition chain in Falstad that turns a slowly
+changing sensor signal (\SIrange{0}{100}{\celsius}) into a 3-bit code. Label
+the five stages Conditioning~| Anti-aliasing~| Sample \& Hold~| Flash ADC~|
+Encoder \& Display.
+\begin{talist}
+\ta Conditioning: resistive sensor in a Wheatstone bridge, sensor current
+	$\leq\SI{1}{\milli\ampere}$, sensor as a resistor with a slider;
+	instrumentation-amplifier front end (two unity-gain buffers and a
+	difference amplifier); gain trimmed to \SI{0}{\volt} at the bottom and
+	exactly \SI{4.00}{\volt} at the top of the range; less than 100 per stage.
+\ta Anti-aliasing: sampling clock $f_s=\SI{5}{\hertz}$. Add the
+	\SI{50}{\hertz}, \SI{5}{\milli\volt} noise source in series with the
+	sensor. Observe the held value without a filter, then add an active
+	low-pass with $f_c\approx\SI{2.5}{\hertz}$ and justify $f_c$ from the
+	Nyquist criterion.
+\ta Sample and hold at \SI{5}{\hertz}: follower, FET switch, hold capacitor,
+	follower. Choose the hold capacitor.
+\ta Flash ADC: ladder $8\times\SI{1}{\kilo\ohm}$ from \SI{4}{\volt}, seven
+	comparators, thermometer code.
+\ta Encoder ($B_2 = C_4$, $B_1 = C_2\overline{C_4} + C_6$,
+	$B_0 = C_1\overline{C_2} + C_3\overline{C_4} + C_5\overline{C_6} + C_7$)
+	and display: 7-LED bar graph and three binary LEDs, each LED with its own
+	resistor.
+\ta Verification table for six inputs near the centres of different code
+	bins, and one line on the aliasing experiment.
+\end{talist}
+
+\begin{solution}
+The design of this chapter is one possible solution; the complete model
+is \falstad{capstone}.
+\begin{talist}
+\ta Pt100 with $R_1=R_3=\SI{3.9}{\kilo\ohm}$, $R_4=\SI{100}{\ohm}$ at
+	$\Vref=\SI{4.00}{\volt}$: $I_S = \SI{1.000}{\milli\ampere}$, bridge
+	output \SIrange{0}{37.18}{\milli\volt}. Buffers, difference amplifier
+	$G_1=10$, non-inverting stage $G_2 = 1+\SI{97.6}{\kilo\ohm}/\SI{10}{\kilo\ohm}=10.76$:
+	$V_\mathrm{COND} = \SIrange{0}{4.00}{\volt}$.
+\ta Without filter the 50\,Hz aliases to
+	$|50-10\cdot5| = \SI{0}{\hertz}$; the held value is offset by up to
+	\SI{0.52}{\volt} (Falstad: \SI{1.75}{\volt} becomes \SI{2.27}{\volt},
+	code 100 instead of 011, \falstad{capstone_nofilter}). Filter
+	$R=\SI{6.8}{\kilo\ohm}$, $C=\SI{10}{\micro\farad}$, $f_c=\SI{2.34}{\hertz}\leq f_s/2$,
+	50\,Hz attenuated to \SI{4.7}{\percent}: \SI{25}{\milli\volt} residual,
+	below $\LSB/2$.
+\ta $C_H=\SI{1}{\micro\farad}$: $\tau = \SI{20}{\micro\second}$ charges
+	within the \SI{20}{\milli\second} window; droop
+	\SI{0.18}{\milli\volt} per hold period for \SI{1}{\nano\ampere} leakage.
+\ta Taps at $0.5, 1.0, \ldots, \SI{3.5}{\volt}$; ladder current
+	\SI{0.5}{\milli\ampere}.
+\ta 3 inverters, 4 AND gates, 2 OR gates (one with 4 inputs);
+	10 LEDs with \SI{330}{\ohm}, \SI{9.8}{\milli\ampere} each.
+\ta See the verification table above. Aliasing line: ``Without the
+	anti-aliasing filter the held value showed a constant offset of
+	\SI{+0.52}{\volt} (one code too high); with the \SI{2.34}{\hertz}
+	low-pass the offset fell below \SI{30}{\milli\volt} and all codes were
+	correct.''
+\end{talist}
+\end{solution}
+
+\exercise{Ratiometric measurement}
+The \SI{4.00}{\volt} reference of the capstone is in fact \SI{4.10}{\volt}.
+\begin{talist}
+\ta How large is $V_\mathrm{COND}$ at \SI{100}{\celsius}?
+\ta Which code does the converter show at \SI{100}{\celsius} and at
+	\SI{56}{\celsius}? Compare with a design in which the bridge is supplied
+	from a separate, exact \SI{4.00}{\volt} source.
+\end{talist}
+
+\begin{solution}
+\begin{talist}
+\ta The bridge output scales with the reference:
+	$V_\mathrm{COND} = \SI{4.0005}{\volt}\cdot 4.10/4.00 = \SI{4.10}{\volt}$.
+\ta The thresholds scale as well ($k\cdot\SI{0.5125}{\volt}$). The ratio
+	$V_\mathrm{COND}/\Vref$ is unchanged, so both codes are unchanged: 111 at
+	\SI{100}{\celsius}, 100 at \SI{56}{\celsius} ($V_\mathrm{COND} =
+	\SI{2.25}{\volt}\cdot1.025 = \SI{2.306}{\volt}$, threshold of level 4:
+	\SI{2.05}{\volt}, of level 5: \SI{2.5625}{\volt}). With an exact bridge
+	supply and a \SI{4.10}{\volt} ladder the thresholds would be
+	\SI{2.5}{\percent} too high while the signal is correct; a value just
+	above a threshold (e.g.\ \SI{2.02}{\volt}) would then be read one code
+	too low. Ratiometric operation removes the reference from the error
+	budget.
+\end{talist}
+\end{solution}
+
+\exercise{Another sampling rate}
+The sampling clock of the capstone is changed to $f_s = \SI{4}{\hertz}$
+and the anti-aliasing filter is removed.
+\begin{talist}
+\ta To which frequency does the \SI{50}{\hertz} interference alias?
+\ta Describe what the LEDs show for a constant temperature with
+	$V_\mathrm{COND}=\SI{1.75}{\volt}$.
+\ta Is this better or worse than the \SI{0}{\hertz} alias at \SI{5}{\hertz}?
+\end{talist}
+
+\begin{solution}
+\begin{talist}
+\ta $|50 - 12\cdot 4| = \SI{2}{\hertz}$, exactly the Nyquist frequency
+	$f_s/2$: consecutive samples see the interference with a phase step of
+	$2\pi\cdot 50/4 = 25\pi$, so its sign alternates from sample to sample.
+\ta The held value alternates between $1.75 + \hat v\sin\varphi$ and
+	$1.75 - \hat v\sin\varphi$ ($\hat v = \SI{0.52}{\volt}$): the LEDs
+	blink at \SI{2}{\hertz} between two codes, e.g.\ 100 and 010 in the
+	worst case, or stay at 011 if the phase happens to be $\varphi \approx 0$.
+\ta It is visible, so it is ``better'' than a silent offset, but the
+	reading is still wrong. Only the low-pass in front of the sampler
+	removes the error for every sampling rate.
+\end{talist}
+\end{solution}
+
+\exercise{Four bits}
+The capstone shall be extended to 4 bits with the same \SI{4.00}{\volt}
+full scale.
+\begin{talist}
+\ta What is the new LSB, in volts and in \si{\celsius}? How many
+	comparators and ladder resistors are needed?
+\ta Is the first-order anti-aliasing filter still sufficient?
+\ta Is the bridge nonlinearity still acceptable?
+\end{talist}
+
+\begin{solution}
+\begin{talist}
+\ta $\LSB = \SI{4}{\volt}/16 = \SI{0.25}{\volt}$ $\widehat{=}$
+	\SI{6.25}{\celsius}; $2^4-1 = 15$ comparators, 16 resistors (taps at
+	$k\cdot\SI{0.25}{\volt}$).
+\ta Residual \SI{25}{\milli\volt} $< \LSB/2 = \SI{125}{\milli\volt}$: yes,
+	still a factor five of margin.
+\ta The maximum deviation from the straight line is about
+	\SI{0.09}{\milli\volt}$\cdot 107.6 = \SI{10}{\milli\volt}$
+	$\ll \SI{125}{\milli\volt}$: yes.
+\end{talist}
+\end{solution}
+
+\exercise{Hold capacitor at the limits}
+In the capstone S\&H the analog switch has $R_\mathrm{on}=\SI{1}{\kilo\ohm}$
+and the total leakage current is \SI{10}{\nano\ampere}. Determine the
+smallest and the largest usable hold capacitor if the droop during one
+hold period and the remaining charging error at the end of the window
+shall both stay below $\LSB/4 = \SI{125}{\milli\volt}$ for a full-scale
+step.
+
+\begin{solution}
+Droop: $I_L\,t_\mathrm{hold}/C_H < \SI{0.125}{\volt}$ $\Rightarrow$
+$C_H > \SI{10}{\nano\ampere}\cdot\SI{0.18}{\second}/\SI{0.125}{\volt} = \SI{14.4}{\nano\farad}$.
+Charging: $\SI{4}{\volt}\cdot e^{-t_w/\tau} < \SI{0.125}{\volt}$
+$\Rightarrow$ $t_w > \tau\ln 32 = 3.47\,\tau$, so
+$\tau < \SI{20}{\milli\second}/3.47 = \SI{5.8}{\milli\second}$ and
+$C_H < \SI{5.8}{\milli\second}/\SI{1}{\kilo\ohm} = \SI{5.8}{\micro\farad}$.
+Any value between about \SI{15}{\nano\farad} and \SI{5.8}{\micro\farad}
+works; \SI{1}{\micro\farad} is a good choice in the middle (on a
+logarithmic scale). In Falstad set the switch's on resistance to
+\SI{1}{\kilo\ohm} and $C_H$ to \SI{10}{\micro\farad} in
+\falstad{capstone}: after a slider step the held staircase needs several
+samples to reach the new value.
+\end{solution}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "docu"
+%%% End:
