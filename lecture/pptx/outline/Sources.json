@@ -1,0 +1,205 @@
+{
+  "chapter": "Voltage and Current Sources",
+  "file": "Sources",
+  "number": 3,
+  "subtitle": "Real sources, Zener and transistor regulators, current sources for sensors",
+  "takeaways": [
+    "Every real source has an internal resistance",
+    "Op-amp loops make voltages and currents exact",
+    "Excite the 1 kΩ sensor with 1 mA, not more"
+  ],
+  "slides": [
+    {
+      "type": "points",
+      "section": "Ideal and Real Voltage Sources",
+      "title": "Real voltage source",
+      "bullets": [
+        "Terminal voltage drops with load current: V_{L} = V_{0} − R_{i}·I_{L}",
+        "Typical R_{i}: AA cell 0.1–0.3 Ω, logic output 20–50 Ω, op-amp output ≪ 1 Ω",
+        "Power matching R_{L} = R_{i}: P_{max} = V_{0}^{2}/(4R_{i}), but only 50 % efficiency",
+        "Supplies and measurement: voltage matching, R_{L} ≫ R_{i}"
+      ],
+      "rule": "V_{L} = V_{0}·R_{L}/(R_{i}+R_{L})",
+      "figure": "load-line-and-operating-point-1.png",
+      "falstad": [
+        {"name": "real_source", "hint": "Move the R_L slider to 1.25 Ω: load power peaks at 4.05 W"}
+      ],
+      "notes": "Battery pack 4.5 V open, 4.0 V at 10 Ω gives R_i = 1.25 Ω. The operating point is the intersection of source line and load line. Calculation in Exercise 3.1."
+    },
+    {
+      "type": "points",
+      "section": "Current Sources and Source Transformation",
+      "title": "Current source and source transformation",
+      "bullets": [
+        "Good current source: large internal resistance, R_{i} ≫ R_{L}",
+        "Never leave an ideal current source open; real ones have a compliance range",
+        "Thevenin ↔ Norton: same V_{0} and I_{0} = V_{0}/R_{i}, same for every load",
+        "Equivalent only at the terminals: the power lost inside differs"
+      ],
+      "rule": "I_{L} = I_{0}·R_{i}/(R_{i}+R_{L})",
+      "figure": "ideal-and-real-current-source-1.png",
+      "falstad": [
+        {"name": "source_transform", "hint": "10 V/10 kΩ and 1 mA ‖ 10 kΩ both give 3.20 V at 4.7 kΩ"}
+      ],
+      "notes": "Show both models side by side in Falstad and change the load: the terminal voltages stay identical. Ask the students which internal resistor gets warmer. Exercise 3.2."
+    },
+    {
+      "type": "points",
+      "section": "The Zener Diode Shunt Regulator",
+      "title": "Zener shunt regulator",
+      "bullets": [
+        "Resistor takes the difference: I_{R} = (V_{in} − V_{Z})/R",
+        "Zener takes what the load does not need: I_{Z} = I_{R} − I_{L}",
+        "Keep I_{Z} ≥ I_{Z,min} (about 5 mA) in every case",
+        "Line regulation ≈ r_{Z}/R, output resistance ≈ r_{Z}; poor efficiency"
+      ],
+      "rule": null,
+      "figure": "shunt-regulator-1.png",
+      "falstad": [
+        {"name": "zener_shunt", "hint": "12 V, 220 Ω, 5.6 V: compare V_out open and with 270 Ω load"}
+      ],
+      "notes": "The full current flows all the time, even without load. Small-signal model with r_Z is in the section on the shunt regulator (Regulation and ripple). With r_Z = 20 Ω and R = 220 Ω, 1 V input ripple gives about 83 mV output ripple."
+    },
+    {
+      "type": "recipe",
+      "section": "The Zener Diode Shunt Regulator",
+      "title": "Design recipe: Zener shunt regulator",
+      "steps": [
+        "Lowest V_{in}, full load: R ≤ (V_{in,min} − V_{Z})/(I_{L,max} + I_{Z,min})",
+        "Pick the next smaller E-value (12 V, 5.6 V, 20 mA → 220 Ω)",
+        "Highest V_{in}, no load: I_{Z,max} = (V_{in,max} − V_{Z})/R, P_{Z} = V_{Z}·I_{Z,max}",
+        "Resistor power: P_{R} = (V_{in,max} − V_{Z})^{2}/R, choose the rating"
+      ],
+      "figure": null,
+      "notes": "Two worst cases: one for regulation, one for the Zener's power. Full numbers in Exercise 3.3; at 11 V input the 220 Ω design is just at the edge."
+    },
+    {
+      "type": "example",
+      "section": "Series Regulators",
+      "title": "Falstad: emitter follower regulator",
+      "figure": "emitter-follower-with-zener-diode-1.png",
+      "falstad": [
+        {"name": "series_regulator", "hint": "Switch R_L between 47 Ω and 470 Ω, watch V_Z hardly move"}
+      ],
+      "observe": [
+        "V_{out} = V_{Z} − V_{BE} ≈ 4.9 V; the Zener only supplies I_{B} = I_{L}/(β+1)",
+        "Idle current 6.4 mA instead of 114 mA for an equivalent shunt regulator",
+        "Transistor power (V_{in} − V_{out})·I_{L} ≈ 0.74 W: heat sink, no short protection"
+      ],
+      "notes": "V_BE drifts with −2 mV/K, so V_out is only accurate to about 0.1 V. Comparison with the shunt regulator in Exercise 3.4."
+    },
+    {
+      "type": "compare",
+      "section": "Series Regulators",
+      "title": "Integrated regulators: 78xx vs LM317",
+      "left": {
+        "head": "78xx fixed",
+        "bullets": [
+          "5, 12 V…; 1 A (TO-220), 0.1 A (78L05)",
+          "Dropout ≈ 2 V, LDO types 0.1–0.5 V",
+          "Current limit, thermal shutdown"
+        ]
+      },
+      "right": {
+        "head": "LM317 adjustable",
+        "bullets": [
+          "V_{out} = 1.25 V·(1 + R_{2}/R_{1})",
+          "R_{1} = 240 Ω sets the minimum load",
+          "1.25 V/R_{1} alone: a current source"
+        ]
+      },
+      "figure": "adjustable-regulator-lm317-1.png",
+      "notes": "Put the input and output capacitors close to the pins, or the regulator may oscillate. The LM317 has no ground pin; its quiescent current leaves through the output. Exercise 3.5 designs a 5 V supply and an LED current source."
+    },
+    {
+      "type": "points",
+      "section": "Op-Amp Voltage Sources",
+      "title": "Op-amp voltage source with booster",
+      "bullets": [
+        "Reference + non-inverting amplifier: as accurate as V_{ref} and R_{2}/R_{1}",
+        "Loop gain makes R_{out} tiny: mΩ instead of the op-amp's 50 Ω",
+        "npn booster inside the loop: op-amp delivers only I_{L}/(β+1)",
+        "V_{BE} drops out; op-amp output must reach V_{out} + V_{BE}"
+      ],
+      "rule": "V_{out} = V_{ref}·(1 + R_{2}/R_{1}),  R_{out} ≈ r_{o}/(1 + Aβ)",
+      "figure": "more-current-transistor-inside-the-loop-1.png",
+      "falstad": [
+        {"name": "opamp_voltage_source", "hint": "Slide R_L from 1 kΩ to 20 Ω: V_out stays at 5.000 V"}
+      ],
+      "notes": "Example: LM4040-2.5 with G = 2 gives 5.000 V from 12 V at up to 100 mA, compared with 4.89–4.95 V for the Zener follower. Point out that the simulation has no current limit; transistor power and SOA limit it in reality (Exercise 3.6)."
+    },
+    {
+      "type": "points",
+      "section": "Transistor Current Sources",
+      "title": "BJT current source",
+      "bullets": [
+        "Emitter follows the base: fixed V_{E} → fixed emitter current",
+        "Load sits in the collector; keep V_{CE} ≥ 0.3 V (compliance)",
+        "Stiff base: divider current ≥ 10·I_{B}, or a Zener or 2 LEDs",
+        "Large V_{E} (≥ 1 V) reduces the −2 mV/K drift of V_{BE}"
+      ],
+      "rule": "I_{C} ≈ (V_{B} − 0.65 V)/R_{E},  R_{L,max} = (V_{CC} − V_{E} − 0.3 V)/I_{C}",
+      "figure": null,
+      "falstad": [
+        {"name": "bjt_current_source", "hint": "1 kΩ and 4.7 kΩ: same 1.02 mA; 15 kΩ saturates (0.71 mA)"}
+      ],
+      "notes": "Capstone thread: 1 mA for the 1 kΩ sensor from 12 V with 10 kΩ/2.2 kΩ and R_E = 1.5 kΩ. The third load is outside the compliance range, so the current drops. Exercise 3.7."
+    },
+    {
+      "type": "example",
+      "section": "Transistor Current Sources",
+      "title": "Falstad: current mirror",
+      "figure": "current-mirror-1.png",
+      "falstad": [
+        {"name": "current_mirror", "hint": "Change R_L: I_out stays near I_ref = 1.04 mA"}
+      ],
+      "observe": [
+        "Q1 as a diode sets V_{BE}; Q2 with the same V_{BE} copies the current",
+        "I_{out} = I_{ref}·β/(β+2): 1.04 mA → 1.02 mA",
+        "Both transistors must match and share the same temperature"
+      ],
+      "notes": "Change R_ref to show that it alone sets the output current. Mirrors are everywhere inside ICs, including op-amps and references."
+    },
+    {
+      "type": "points",
+      "section": "Op-Amp Current Sources and Sensor Excitation",
+      "title": "Op-amp current sources",
+      "bullets": [
+        "Op-amp forces V_{RS} = V_{set}: I = V_{set}/R_{S}, V_{BE} drift drops out",
+        "With transistor: base current lost (1 % at β = 100), MOSFET avoids it",
+        "Floating sensor in the feedback path: exact current, no terminal at ground",
+        "Howland pump for grounded loads: needs well matched resistors"
+      ],
+      "rule": "I = V_{set}/R_{S}: as accurate as V_{set} and R_{S}",
+      "figure": "op-amp-and-transistor-1.png",
+      "falstad": [
+        {"name": "opamp_current_source", "hint": "Compare 0.990 mA (transistor) with 1.000 mA (floating)"}
+      ],
+      "notes": "V_set = 1.00 V, R_S = 1.00 kΩ gives 1 mA; the floating sensor shows VOUT2 = 2.385 V at 1385 Ω. Compliance: V_out must stay inside the op-amp output range. Howland derivation in the script section on op-amp current sources."
+    },
+    {
+      "type": "points",
+      "section": "Op-Amp Current Sources and Sensor Excitation",
+      "title": "Sensor excitation: why 1 mA?",
+      "bullets": [
+        "Pt1000-like sensor: 1000 Ω at 0 °C, 1385 Ω at 100 °C",
+        "Constant current makes V_{sensor} linear in T: 3.85 mV/K at 1 mA",
+        "Self-heating: 1.39 mW → about 0.55 K error at 0.4 K/mW",
+        "The 1 V offset at 0 °C is removed by a bridge (next chapters)"
+      ],
+      "rule": "P = I^{2}·R: half the current, a quarter of the self-heating",
+      "figure": null,
+      "falstad": [],
+      "notes": "This is the capstone thread: the sensor must not carry more than 1 mA. Self-heating depends strongly on mounting (still air vs flowing water). Ratiometric measurement in the chapter on voltage references is often better than a precise current."
+    }
+  ],
+  "exercises": [
+    "Exercise 3.1: Measuring a real voltage source",
+    "Exercise 3.2: Source transformation",
+    "Exercise 3.3: Design of a Zener shunt regulator",
+    "Exercise 3.4: Emitter follower regulator",
+    "Exercise 3.5: Adjustable regulator LM317",
+    "Exercise 3.6: Op-amp voltage source for 3.3 V",
+    "Exercise 3.7: BJT current source for a resistive sensor"
+  ]
+}

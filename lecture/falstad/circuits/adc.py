@@ -1,4 +1,4 @@
-"""Falstad examples for chapter 8: Analog-to-Digital Conversion.
+"""Falstad examples for chapter 9: Analog-to-Digital Conversion.
 
 The flash converter is the one of the capstone task: reference ladder
 8 x 1 kOhm from 4 V (taps 0.5 .. 3.5 V), comparators Ck = (Vin > k*0.5 V),

@@ -1,4 +1,4 @@
-"""Falstad examples for chapter 7: Sample and Hold.
+"""Falstad examples for chapter 8: Sample and Hold.
 
 All circuits sample at fs = 5 Hz with a 10 % duty cycle clock (track window
 20 ms, hold 180 ms), as in the capstone task. The switch path has a series

@@ -16,12 +16,12 @@ low-pass filter in front of the analog-to-digital converter removes it.
 It has a second, more fundamental task: a sampling system with sample rate
 $f_s$ cannot distinguish a signal at frequency $f$ from one at
 $f \pm k f_s$. Everything above $f_s/2$ must be removed \emph{before}
-sampling; this is the anti-aliasing filter (chapter~8 explains aliasing in
+sampling; this is the anti-aliasing filter (chapter~\ref{ch:ADC} explains aliasing in
 detail).
 \newline
 We start with the passive RC filter and the tools to describe it: complex
 transfer function, magnitude and phase, decibels and the Bode plot. Then
-we add op-amps (chapter~5) to get first-order and second-order active
+we add op-amps (chapter~\ref{ch:OpAmps}) to get first-order and second-order active
 filters, and finally design the 2.5\,Hz anti-aliasing low-pass of the
 capstone task. Further reading: \cite{tietze2008} (chapters on filters),
 \cite{horowitz2015} (chapter~6), \cite{mancini2002} (active filter design)
@@ -393,7 +393,7 @@ Sallen-Key ($f_0 = \SI{1003}{\hertz}$, $Q=0.742$) & \SI{0.744}{\volt} & \SI{0.01
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The Anti-Aliasing Filter of the Capstone}\label{sec:filters-aa}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\nsl{In the capstone the amplified bridge signal (0 to 4.00\,V, chapter~5)
+\nsl{In the capstone the amplified bridge signal (0 to 4.00\,V, chapter~\ref{ch:OpAmps})
 is sampled by a sample-and-hold circuit with $f_s = 5\,$Hz and converted by
 a 3-bit flash ADC. The sensor signal itself changes slowly. The problem is
 the 50\,Hz interference of 5\,mV in series with the Pt100: it is a
@@ -404,7 +404,7 @@ the values used in the capstone chapter: $R = \SI{6.8}{\kilo\ohm}$,
 $C = \SI{10}{\micro\farad}$.\newpage}
 
 \begin{description}
-\item[{\rot\bf Why filter before sampling? (preview of chapter 8)}]~\\[-\lblskip]
+\item[{\rot\bf Why filter before sampling? (preview of chapter~\ref{ch:ADC})}]~\\[-\lblskip]
 \bi
 	\ite sampling theorem (Nyquist, Shannon \cite{shannon1949}): only frequencies below $f_s/2$ are reproduced correctly
 	\ite with $f_s = \SI{5}{\hertz}$: $f_s/2 = \SI{2.5}{\hertz}$ $\Rightarrow$ cutoff of the low-pass $f_c \approx \SI{2.5}{\hertz}$

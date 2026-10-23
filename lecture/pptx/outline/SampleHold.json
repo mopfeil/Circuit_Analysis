@@ -1,0 +1,220 @@
+{
+  "chapter": "Sample and Hold",
+  "file": "SampleHold",
+  "number": 8,
+  "subtitle": "Freeze the filtered signal at a defined instant while the ADC converts",
+  "takeaways": [
+    "C_{H} window: droop sets the minimum, acquisition the max",
+    "Settle to ½ LSB: t_{acq} ≈ 0.69·(N+1)·τ ≤ t_{track}",
+    "Buffer both sides: follower, switch, C_{H}, follower"
+  ],
+  "slides": [
+    {
+      "type": "points",
+      "section": "Why Sample and Hold?",
+      "title": "Why sample and hold?",
+      "bullets": [
+        "Defines the sampling instant t_{k} = k·T_{s}",
+        "Keeps the voltage constant while the ADC converts",
+        "Without S&H: |dV/dt|_{max}·t_{conv} < ½ LSB, e.g. 12 bit: f < 3.9 Hz",
+        "With S&H only the aperture time counts (nanoseconds)",
+        "Capstone: f_{s} = 5 Hz, 3-bit flash ADC, 0 to 4 V, LSB 0.5 V"
+      ],
+      "rule": null,
+      "figure": null,
+      "falstad": [],
+      "notes": "Position in the chain: sensor, anti-aliasing low-pass, S&H, ADC. The 12-bit example (t_{conv} = 10 µs, 2 V amplitude) is worked in section Why Sample and Hold?. Even a flash converter needs a defined instant so the display does not flicker."
+    },
+    {
+      "type": "points",
+      "section": "The Track-and-Hold Principle",
+      "title": "Switch and hold capacitor",
+      "bullets": [
+        "Clock high: switch closed, C_{H} follows V_{in} (track)",
+        "Clock low: switch open, C_{H} keeps its charge (hold)",
+        "Capstone clock: 5 Hz, duty cycle 10 %: track 20 ms, hold 180 ms",
+        "Errors: acquisition, aperture/jitter, pedestal, droop"
+      ],
+      "rule": "Held value = V_{in} at the end of the track phase",
+      "figure": "switch-and-hold-capacitor-1.png",
+      "falstad": [],
+      "notes": "Strictly this is a track-and-hold; the names are used interchangeably. R_{S} contains source resistance, switch R_{on} and the 1 kΩ that limits the op-amp charging current. The terms diagram is in section The Track-and-Hold Principle."
+    },
+    {
+      "type": "example",
+      "section": "The Track-and-Hold Principle",
+      "title": "Falstad: basic sample and hold",
+      "figure": "timing-diagram-1.png",
+      "falstad": [
+        {"name": "sh_basic", "hint": "Watch Vhold step once per 200 ms at the falling clock edge"}
+      ],
+      "observe": [
+        "Output is a staircase, one step per sampling period",
+        "Held values about 5 mV below V_{in}: C_{H} lags a rising input",
+        "Change the duty cycle of the clock rail and watch the track window"
+      ],
+      "notes": "V_{in} = 2 V + 1.5 V·sin(2π·0.5 Hz·t), R_{S} = 1 kΩ, C_{H} = 1 µF. Held values 2.094, 2.956, 3.452 V and so on. The lag is slope × τ = 4.7 V/s × 1 ms."
+    },
+    {
+      "type": "points",
+      "section": "Analog Switches",
+      "title": "Analog switches",
+      "bullets": [
+        "nMOS switch: R_{on} grows as V_{in} approaches V_{G} − V_{th}",
+        "Transmission gate: nMOS + pMOS in parallel, almost constant R_{on}",
+        "Parts: CD4066, 74HC4066 (R_{on} ≈ 50 to 300 Ω), DG4xx; off leakage pA to nA",
+        "Falstad Analog Switch: closed above 2.5 V, R_{on} 20 Ω, R_{off} 10 GΩ"
+      ],
+      "rule": null,
+      "figure": "cmos-transmission-gate-1.png",
+      "falstad": [],
+      "notes": "The Falstad switch has no charge injection and no leakage; we add them as discrete elements later. The 1 kΩ series resistor limits the charging current and keeps the op-amp stable with the large capacitive load."
+    },
+    {
+      "type": "points",
+      "section": "Designing the Hold Capacitor",
+      "title": "Acquisition: settle to ½ LSB",
+      "bullets": [
+        "Charging: τ = (R_{S} + R_{on})·C_{H}, worst case a full-scale step",
+        "N = 3: 2.77·τ; N = 8: 6.2·τ; N = 12: 9.0·τ; N = 16: 11.8·τ",
+        "Design rule: t_{acq} ≤ t_{track}, upper limit for C_{H}",
+        "Capstone: τ = 1.02 ms, t_{acq} = 2.83 ms ≪ 20 ms"
+      ],
+      "rule": "t_{acq} = τ·ln(2^{N+1}) ≈ 0.69·(N+1)·τ",
+      "figure": null,
+      "falstad": [
+        {"name": "sh_acquisition", "hint": "4 V step: 2.53 V after τ, 3.75 V (½ LSB below) after 2.83 ms"}
+      ],
+      "notes": "Use a time constant of a few percent of the track window; the rest is reserve for op-amp settling and tolerances. Derivation in section Designing the Hold Capacitor; Exercise 8.1."
+    },
+    {
+      "type": "points",
+      "section": "Designing the Hold Capacitor",
+      "title": "Droop: losing charge in hold",
+      "bullets": [
+        "Leakage: open switch, dielectric, buffer bias current, PCB surface",
+        "Droop rate dV_{H}/dt = I_{leak}/C_{H}",
+        "t_{hold}: worst case the whole period T_{s} − t_{track}",
+        "Design rule gives the lower limit for C_{H}"
+      ],
+      "rule": "C_{H} ≥ I_{leak}·t_{hold}/ΔV_{max}",
+      "figure": "droop-losing-charge-in-the-hold-phase-1.png",
+      "falstad": [],
+      "notes": "Real leakage is pA to nA, so the lower limit is usually far away. The capstone allows ΔV_{max} = LSB/10 = 50 mV."
+    },
+    {
+      "type": "example",
+      "section": "Designing the Hold Capacitor",
+      "title": "Falstad: too small, right, too large",
+      "figure": null,
+      "falstad": [
+        {"name": "sh_capsize", "hint": "3 V input, 50 nA leakage: compare 10 nF, 1 µF and 100 µF"}
+      ],
+      "observe": [
+        "10 nF: charges fully, but droops 3.00 V → 2.10 V per hold",
+        "1 µF: 3.00 V → 2.99 V, the right choice",
+        "100 µF: only 18 % per sample, 1.88 V after five samples"
+      ],
+      "notes": "The leakage is exaggerated to make droop visible. A too large capacitor turns the S&H into a low-pass filter. Exercise 8.2."
+    },
+    {
+      "type": "recipe",
+      "section": "Designing the Hold Capacitor",
+      "title": "Design recipe: hold capacitor",
+      "steps": [
+        "Track window t_{track} = D·T_{s} (capstone: 5 Hz, 10 %: 20 ms)",
+        "Upper limit: C_{H} ≤ t_{track}/((R_{S} + R_{on})·ln 2^{N+1}) = 7.1 µF",
+        "Lower limit: C_{H} ≥ I_{leak}·t_{hold}/ΔV_{max} = 36 nF (10 nA, 50 mV)",
+        "Pick the geometric middle: C_{H} = 1 µF, safety factor ≈ 7 each side",
+        "Use PP, PS film or C0G; never electrolytic capacitors"
+      ],
+      "figure": null,
+      "notes": "Capstone result: R_{S} = 1 kΩ, C_{H} = 1 µF film, t_{acq} = 2.8 ms, droop 1.8 mV at 10 nA. Electrolytics leak in the µA range. Dielectric absorption makes the held voltage creep back; film capacitors show little of it."
+    },
+    {
+      "type": "points",
+      "section": "Errors of a Real Sample and Hold",
+      "title": "Charge injection (pedestal)",
+      "bullets": [
+        "Clock step couples through C_{gd} onto the hold node",
+        "C_{gd} = 10 pF, 5 V: −49.5 mV with 1 nF, −0.5 mV with 100 nF",
+        "Constant part can be calibrated, signal-dependent part cannot",
+        "Remedies: larger C_{H}, transmission gate, dummy switch"
+      ],
+      "rule": "ΔV_{ped} = −ΔV_{clk}·C_{gd}/(C_{gd} + C_{H}) ≈ −Q_{inj}/C_{H}",
+      "figure": "charge-injection-pedestal-1.png",
+      "falstad": [
+        {"name": "sh_pedestal", "hint": "2 V input: Vhold_1n drops to 1.9505 V, Vhold_100n to 1.9995 V"}
+      ],
+      "notes": "Falstad models only the coupling capacitance, not the channel charge. Exercise 8.4."
+    },
+    {
+      "type": "points",
+      "section": "Errors of a Real Sample and Hold",
+      "title": "Feedthrough, aperture and jitter",
+      "bullets": [
+        "Feedthrough: C_{ds} of the open switch couples V_{in} to C_{H}",
+        "Aperture delay: constant, only shifts the sampling instant",
+        "Aperture jitter: error ΔV = (dV/dt)·t_{j}; 12 bit, 1 MHz: t_{j} < 19 ps",
+        "Dielectric absorption: held voltage creeps back"
+      ],
+      "rule": "Full-scale sine: t_{j} < 1/(2π·f·2^{N})",
+      "figure": null,
+      "falstad": [],
+      "notes": "Jitter is why fast converters need clean clocks. For the 5 Hz capstone a millisecond of jitter is harmless, see Exercise 8.6."
+    },
+    {
+      "type": "example",
+      "section": "The Buffered Sample and Hold",
+      "title": "Falstad: why both buffers?",
+      "figure": null,
+      "falstad": [
+        {"name": "sh_buffered", "hint": "Compare Vout_unbuf with the buffered output over one period"}
+      ],
+      "observe": [
+        "Unbuffered (R_{i} 10 kΩ, R_{L} 100 kΩ): 2.425 V after track, 0.401 V at end",
+        "Buffered: 3.000 V during the whole period",
+        "Input buffer supplies the charge, output buffer draws none"
+      ],
+      "notes": "The unbuffered circuit fails three ways: divider between source and load, slow charging, discharge through the load. Use a FET-input op-amp as output buffer; its bias current adds to I_{leak}. Exercise 8.3."
+    },
+    {
+      "type": "example",
+      "section": "The Buffered Sample and Hold",
+      "title": "Falstad: sampling a ramp",
+      "figure": "sampling-a-ramp-1.png",
+      "falstad": [
+        {"name": "sh_staircase", "hint": "Triangle 0 to 4 V at 0.5 Hz: count the 0.8 V steps"}
+      ],
+      "observe": [
+        "Steps 0.08, 0.88, 1.68, 2.48, 3.28 V: 4 V/s × 0.2 s = 0.8 V",
+        "0.8 V > 1 LSB (0.5 V): consecutive samples skip codes",
+        "Not an S&H error: the input is too fast for f_{s}"
+      ],
+      "notes": "Clock rail: square, 5 Hz, 2.5 V amplitude, 2.5 V offset, duty cycle 0.1. Such fast signals must be removed by the anti-aliasing filter. Exercise 8.5."
+    },
+    {
+      "type": "points",
+      "section": "The Buffered Sample and Hold",
+      "title": "Practical hints",
+      "bullets": [
+        "Rail-to-rail output for 0 to 4 V on 5 V; FET input for the output buffer",
+        "Guard ring around the hold node against surface leakage",
+        "Integrated S&H (LF398, AD783): only C_{H} external",
+        "SAR and sigma-delta ADCs sample internally: driver must settle in t_{acq}"
+      ],
+      "rule": null,
+      "figure": null,
+      "falstad": [],
+      "notes": "The LF398 data sheet has acquisition time and droop curves versus C_{H}, a good illustration. Microcontroller SAR inputs sample with a few pF; the same t_{acq} = τ·ln 2^{N+1} calculation limits the source resistance."
+    }
+  ],
+  "exercises": [
+    "Exercise 8.1: Choosing the hold capacitor for f_{s} = 5 Hz",
+    "Exercise 8.2: Droop and a too large capacitor",
+    "Exercise 8.3: Unbuffered sample and hold",
+    "Exercise 8.4: Pedestal error",
+    "Exercise 8.5: Ramp input and step size",
+    "Exercise 8.6: Aperture jitter"
+  ]
+}

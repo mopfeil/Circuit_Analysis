@@ -1,4 +1,4 @@
-"""Falstad examples for chapter 9: From Sensor to Digital Value (capstone).
+"""Falstad examples for chapter 10: From Sensor to Digital Value (capstone).
 
 Design (see Capstone.tex):
   sensor     Pt100, R(T) = 100 Ohm (1 + 0.00385/K T), 0..100 degC -> 100..138.5 Ohm

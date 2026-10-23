@@ -1,4 +1,4 @@
-"""Falstad examples for chapter 2: Voltage and Current Sources."""
+"""Falstad examples for chapter 3: Voltage and Current Sources."""
 import math
 
 from falstad import Circuit, Elm, Sim, VT
@@ -284,5 +284,68 @@ def opamp_current_source():
     return c, check
 
 
+def opamp_voltage_source():
+    """2.5 V reference, non-inverting amplifier G = 2 and NPN booster."""
+    c = Circuit("opamp_voltage_source",
+                "Op-amp voltage source: 2.5 V reference, G = 2, NPN booster")
+
+    def cell(x0, rl, name, title):
+        c.text((x0, 48), title)
+        c.vsrc((x0, 384), (x0, 96), 12)
+        c.wire((x0, 96), (x0 + 272, 96))
+        c.rail((x0 + 96, 208), 2.5, label_dir=(-32, 0))  # LM4040-2.5 (ideal)
+        c.label((x0 + 96, 208), name + "_ref", d=(0, -16))
+        op = c.opamp((x0 + 144, 224), swap=True, vmax=12, vmin=0)
+        c.wire((x0 + 96, 208), op.pin["+"])
+        q = c.npn((x0 + 240, 224))
+        c.wire(op.pin["out"], (x0 + 240, 224))
+        c.wire(q.pin["c"], (x0 + 272, 96))
+        c.wire(q.pin["e"], (x0 + 272, 256), (x0 + 320, 256), (x0 + 368, 256))
+        c.res((x0 + 320, 256), (x0 + 320, 320), 10e3)
+        c.res((x0 + 320, 320), (x0 + 320, 384), 10e3)
+        c.wire((x0 + 320, 320), (x0 + 128, 320), (x0 + 128, 240), op.pin["-"])
+        r = c.res((x0 + 368, 256), (x0 + 368, 384), rl)
+        c.wire((x0, 384), (x0 + 320, 384), (x0 + 368, 384))
+        c.gnd((x0 + 320, 384))
+        c.label((x0 + 368, 256), name, d=(0, -16))
+        c.text((x0 + 48, 160), "Vref (LM4040)")
+        c.text((x0 + 224, 288), "R2 10k")
+        c.text((x0 + 224, 368), "R1 10k")
+        c.text((x0 + 384, 336), "RL")
+        return r, op, q
+
+    cells = [cell(96, 470, "Vout_10mA", "RL = 470 Ohm"),
+             cell(608, 47, "Vout_100mA", "RL = 47 Ohm")]
+    c.slider(cells[1][0], 20, 1000, "RL")
+
+    def check(s):
+        # start near the operating point (see opamp_current_source)
+        for _, op, q in cells:
+            for p, v in ((op.pin["+"], 2.5), (op.pin["-"], 2.5),
+                         (op.pin["out"], 5.7), (q.pin["b"], 5.7),
+                         (q.pin["e"], 5.0), (q.pin["c"], 12.0)):
+                s.x[s.node(p)] = v
+            for it in s.items:
+                if it["e"] is q:
+                    it["vbe"], it["vbc"] = 0.7, -6.3
+        s.dc()
+        for name in ("Vout_10mA", "Vout_100mA"):
+            approx(s.v(name), 2 * s.v(name + "_ref"), rel=1e-4, what=name + " = 2 Vref")
+            approx(s.v(name), 5.000, rel=2e-4, what=name)
+        approx(s.v("Vout_100mA") / 47, 0.106, rel=0.005, what="IL 47")
+        approx(s.v("Vout_10mA") - s.v("Vout_100mA"), 0.0, absol=1e-3,
+               what="load regulation")
+        # lower end of the RL slider: 20 Ohm, 250 mA
+        rl = cells[1][0]
+        rl.params[0] = 20.0
+        try:
+            s.dc()
+            approx(s.v("Vout_100mA"), 5.000, rel=2e-4, what="Vout at 20 Ohm")
+        finally:
+            rl.params[0] = 47.0
+    return c, check
+
+
 CIRCUITS = [real_source, source_transform, zener_shunt, series_regulator,
+            opamp_voltage_source,
             bjt_current_source, current_mirror, opamp_current_source]

@@ -1,4 +1,4 @@
-"""Falstad examples for chapter 4: Bridge Circuits.
+"""Falstad examples for chapter 5: Bridge Circuits.
 
 Capstone bridge (same design as Capstone.tex / capstone.py):
   Pt100, 100 Ohm (0 degC) .. 138.5 Ohm (100 degC), bridge fed from the

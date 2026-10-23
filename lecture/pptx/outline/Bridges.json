@@ -1,0 +1,233 @@
+{
+ "chapter": "Bridge Circuits",
+ "file": "Bridges",
+ "number": 5,
+ "subtitle": "Turn small sensor resistance changes into a clean differential voltage",
+ "takeaways": [
+  "A bridge removes the constant part, leaves only the change",
+  "Unequal arms (m ≫ 1): less signal, much better linearity",
+  "Read the bridge differentially: buffers + difference amp"
+ ],
+ "slides": [
+  {
+   "type": "points",
+   "section": "The Wheatstone Bridge",
+   "title": "Two dividers, one difference",
+   "bullets": [
+    "V_{d} = V_{A} − V_{B}: difference of two divider taps, neither at ground",
+    "Balanced (V_{d} = 0) independent of V_{B}: supply drift cancels at balance",
+    "Null method: adjust a known R until V_{d} = 0 (classic Wheatstone)",
+    "Deflection method: fixed R, balanced at the reference point, measure V_{d}"
+   ],
+   "rule": "Balance: R_{1}·R_{4} = R_{2}·R_{3}",
+   "figure": "two-voltage-dividers-1.png",
+   "falstad": [
+    {
+     "name": "wheatstone",
+     "hint": "Move the Rx slider: 1010 Ω gives 12.44 mV, 1500 Ω gives 0.500 V"
+    }
+   ],
+   "notes": "Start from the sensor in a plain divider: the tiny change sits on a large constant voltage. The second divider subtracts that constant part. Away from balance V_d is proportional to V_B, so the excitation must be stable or the measurement ratiometric. Exercise 5.1 does the numbers."
+  },
+  {
+   "type": "points",
+   "section": "Output Voltage and Linearity",
+   "title": "Quarter bridge: the output bends",
+   "bullets": [
+    "One sensor R_{0}(1+x), other arms R_{0}: V_{d} = (V_{B}/4)·x/(1+x/2)",
+    "Relative error of the linear formula ≈ −x/2",
+    "Strain gauge (x < 0.5 %): negligible; Pt100 over 100 K (x = 38.5 %): 16 %",
+    "Cause: the current in the sensor leg changes with the sensor"
+   ],
+   "rule": "V_{d} ≈ (V_{B}/4)·ΔR/R_{0}",
+   "figure": "the-bridge-is-not-linear-1.png",
+   "falstad": [],
+   "notes": "Show the plot: positive x gives too small an output, negative x too large. The derivation is in section Output Voltage and Linearity of the script."
+  },
+  {
+   "type": "compare",
+   "section": "Output Voltage and Linearity",
+   "title": "Sensitivity vs. linearity: choose m",
+   "left": {
+    "head": "Equal arms (m = 1)",
+    "bullets": [
+     "Max. sensitivity V_{B}/4 per unit x",
+     "Nonlinearity ≈ −x/2",
+     "High sensor current, self-heating"
+    ]
+   },
+   "right": {
+    "head": "Unequal arms (m = 39)",
+    "bullets": [
+     "Sensitivity m/(m+1)^{2} = 0.024",
+     "Nonlinearity ≈ −x/(m+1): 20× smaller",
+     "Sensor leg acts like a current source"
+    ]
+   },
+   "figure": null,
+   "notes": "R1 = R3 = m·R0. A large m keeps the leg current nearly constant, so the sensor voltage is nearly proportional to its resistance. The amplifier needs gain anyway, while nonlinearity would need software correction."
+  },
+  {
+   "type": "points",
+   "section": "Half and Full Bridges: Strain Gauges",
+   "title": "Strain gauges: quarter, half, full bridge",
+   "bullets": [
+    "Gauge factor k ≈ 2: x = k·ε; 1000 µm/m gives only 0.2 % ΔR",
+    "Quarter: V_{d} ≈ V_{B}·x/4, half: V_{B}·x/2, full: V_{B}·x",
+    "Half and full bridge are exactly linear: the leg current stays constant",
+    "Temperature changes all gauges equally: compensated"
+   ],
+   "rule": null,
+   "figure": null,
+   "falstad": [
+    {
+     "name": "bridge_types",
+     "hint": "Compare the three voltmeters: 2.50 mV, 5.00 mV, 10.0 mV"
+    }
+   ],
+   "notes": "Gauges on top of a bending beam are stretched, on the bottom compressed; put them in adjacent arms. Load cells of scales are full bridges. In a quarter bridge a dummy gauge gives the temperature compensation. Exercise 5.2."
+  },
+  {
+   "type": "points",
+   "section": "Resistive Temperature Sensors",
+   "title": "Platinum sensors Pt100 and Pt1000",
+   "bullets": [
+    "Pt100: 100 Ω at 0 °C, 138.5 Ω at 100 °C, 0.385 Ω/K",
+    "Linear model good to 0.4 K over 0 … 100 °C; Callendar–Van Dusen beyond",
+    "Class B: ±(0.3 K + 0.005·|T|), class A: ±(0.15 K + 0.002·|T|)",
+    "Self-heating ΔT = E·I^{2}·R: Pt100 ≤ 1 mA, Pt1000 ≤ 0.3 mA"
+   ],
+   "rule": "R(T) = R_{0}·(1 + α·T), α = 3.85·10^{-3}/K",
+   "figure": "pt100-characteristic-1.png",
+   "falstad": [],
+   "notes": "Platinum is stable and standardised (IEC 60751). Self-heating depends on coupling to the medium: 0.1 K/mW in flowing water, about 1 K/mW in still air. Exercise 5.3 has the numbers."
+  },
+  {
+   "type": "compare",
+   "section": "Resistive Temperature Sensors",
+   "title": "Platinum RTD vs. NTC thermistor",
+   "left": {
+    "head": "Pt100 / Pt1000",
+    "bullets": [
+     "+0.39 %/K, nearly linear",
+     "Standardised, accurate, stable",
+     "Needs a bridge and gain"
+    ]
+   },
+   "right": {
+    "head": "NTC thermistor",
+    "bullets": [
+     "About −4.4 %/K at 25 °C: 10× more",
+     "Strongly nonlinear (exponential)",
+     "Cheap; linearise with R or a table"
+    ]
+   },
+   "figure": "ntc-thermistors-1.png",
+   "notes": "NTC model: R(T) = R25·exp(B·(1/T − 1/T25)), for example 10 kΩ and B = 3950 K. The capstone uses the Pt100 because its characteristic is reproducible."
+  },
+  {
+   "type": "recipe",
+   "section": "Designing the Sensor Bridge",
+   "title": "Design recipe: sensor bridge",
+   "steps": [
+    "Excite from the ADC reference (ratiometric): here V_{ref} = 4.00 V",
+    "R_{4} = R_{sensor}(T_{min}): V_{d} = 0 at T_{min} (Pt100: R_{4} = 100 Ω)",
+    "R_{1} ≥ V_{B}/I_{max} − R_{sensor}, next E-value; R_{3} = R_{1} (here 3.9 kΩ)",
+    "Exact V_{d}(T_{max}) and gain G = V_{FS}/V_{d}(T_{max}): 37.18 mV, G = 107.6",
+    "Check nonlinearity x/(m+1), self-heating, common mode ≈ V_{B}/(m+1)"
+   ],
+   "figure": "the-capstone-bridge-1.png",
+   "notes": "This is the design card of the chapter applied to the capstone: Pt100, 0 to 100 °C, at most 1 mA. Sensitivity is about 0.37 mV/K and the self-heating 0.1 mW. Worked out in Exercise 5.4."
+  },
+  {
+   "type": "example",
+   "section": "Designing the Sensor Bridge",
+   "title": "Falstad: capstone bridge, Pt100 and Pt1000",
+   "figure": "bridge-output-over-temperature-1.png",
+   "falstad": [
+    {
+     "name": "pt100_bridge",
+     "hint": "Slider 100 / 119.25 / 138.5 Ω: 0, 18.68, 37.18 mV"
+    },
+    {
+     "name": "pt1000_bridge",
+     "hint": "Slider 1000 / 1192.5 / 1385 Ω: 0, 134.7, 260.9 mV"
+    }
+   ],
+   "observe": [
+    "Pt100, m = 39: almost a straight line, 0.09 mV ≈ 0.24 K off at 50 °C",
+    "V_{R} stays at 100 mV: the reference arm is the constant part",
+    "Pt1000 at 5 V (m = 4.7): 7× more signal, 1.6 % nonlinearity"
+   ],
+   "notes": "With m = 1 the same Pt100 bridge would deviate by 4.4 K. The Pt1000 version is Exercise 5.5: more signal and less gain needed, but almost ten times the self-heating power."
+  },
+  {
+   "type": "points",
+   "section": "Reading the Bridge: Common-Mode Voltage",
+   "title": "Read the bridge differentially",
+   "bullets": [
+    "Both taps sit at ≈ 100 mV (common mode); the signal is their difference",
+    "Single-ended gain 107.6 at V_{S}: 10.75 V at 0 °C instead of 0 V",
+    "Difference amplifier amplifies V_{S} − V_{R}, rejects V_{CM} if R match",
+    "Buffers keep the bridge unloaded; gain stage G_{2} = 10.76 → 0 … 4.00 V"
+   ],
+   "rule": null,
+   "figure": "difference-and-instrumentation-amplifier-1.png",
+   "falstad": [
+    {
+     "name": "bridge_single_ended",
+     "hint": "Output far above 4 V: the constant part is amplified too"
+    },
+    {
+     "name": "bridge_ina",
+     "hint": "Pt100 slider: 0 V, 2.01 V, 4.00 V at 0, 50, 100 °C"
+    }
+   ],
+   "notes": "Open the single-ended version first and show the huge output, then the buffered difference amplifier. Without buffers the 10 kΩ inputs would load the 97.5 Ω bridge and spoil the common-mode rejection. Details in chapter Operational Amplifiers."
+  },
+  {
+   "type": "example",
+   "section": "Interference and Lead Resistance",
+   "title": "Falstad: 50 Hz in series with the sensor",
+   "figure": "50-hz-in-series-with-the-sensor-1.png",
+   "falstad": [
+    {
+     "name": "bridge_50hz",
+     "hint": "Scope: 4.88 mV amplitude at V_S, 0.52 V at Vout"
+    }
+   ],
+   "observe": [
+    "Series interference changes only V_{S}: differential, not rejected",
+    "After G = 107.6: 0.52 V amplitude, about one LSB (0.5 V)",
+    "Remedies: twisted pair, shield, short leads, low-pass before the ADC"
+   ],
+   "notes": "The sensor loop acts as a transformer winding for the lamp fields. Only interference that reaches both nodes equally is common mode. The filter chapter designs the low-pass that removes it."
+  },
+  {
+   "type": "example",
+   "section": "Interference and Lead Resistance",
+   "title": "Falstad: 2-wire vs. 3-wire connection",
+   "figure": "lead-resistance-2-wire-and-3-wire-connec-2.png",
+   "falstad": [
+    {
+     "name": "bridge_3wire",
+     "hint": "At 100 Ω: 2-wire 0.975 mV, 3-wire 0 V; then both at 138.5 Ω"
+    }
+   ],
+   "observe": [
+    "2-wire: 2·R_{L} in series with the Pt100; 1 Ω → 2.6 K error",
+    "3-wire: R_{L1} and R_{L2} sit in adjacent arms and cancel at balance",
+    "4-wire: current through two leads, sense voltage on the other two"
+   ],
+   "notes": "Lead resistance 0.5 Ω per wire. At 100 °C the 3-wire error is only 0.05 K (37.16 instead of 37.18 mV), the 2-wire bridge reads 38.13 mV. Exercise 5.6."
+  }
+ ],
+ "exercises": [
+  "Exercise 5.1: Wheatstone bridge",
+  "Exercise 5.2: Strain gauge bridge",
+  "Exercise 5.3: Pt100 values",
+  "Exercise 5.4: Design of the capstone bridge",
+  "Exercise 5.5: Alternative: Pt1000 at 5 V",
+  "Exercise 5.6: Interference and lead resistance"
+ ]
+}

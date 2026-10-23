@@ -1,0 +1,144 @@
+{
+  "chapter": "Basics",
+  "file": "Basics",
+  "number": 1,
+  "subtitle": "The tools every later chapter uses: Ohm, Kirchhoff, dividers, LED, RC",
+  "takeaways": [
+    "Every connection is a divider: watch the load",
+    "Size LED resistors from V_{S} − V_{F}, round up",
+    "τ = RC: 63 % after τ, settled after 5τ"
+  ],
+  "slides": [
+    {"type": "points", "section": "Quantities, Units and Ohm's Law", "title": "Ohm's law, power and standard values",
+     "bullets": [
+       "Calculate in V, kΩ and mA: no powers of ten needed",
+       "P = V·I = I^{2}R = V^{2}/R; stay below about 50 % of the power rating",
+       "SMD 0603: 0.1 W, 1206: 0.25 W, through-hole 0207: 0.25 … 0.6 W",
+       "E12: 1.0 1.2 1.5 1.8 2.2 2.7 3.3 3.9 4.7 5.6 6.8 8.2; E96 for 1 % parts",
+       "Capstone: sensor current limited to 1 mA because of self-heating"
+     ],
+     "rule": "V = R·I",
+     "figure": "ohm-s-law-1.png",
+     "falstad": [],
+     "notes": "Quick repetition from the intro course. Stress the kΩ/mA/V habit and the 50 % power rule; 100 Ω at 5 V already dissipates 250 mW. A design always ends with picking the next E-series value and recalculating."},
+    {"type": "compare", "section": "Kirchhoff's Laws and Networks", "title": "Series and parallel",
+     "left": {"head": "Series", "bullets": ["Same current, voltages add (KVL)", "R = R_{1} + R_{2}", "Larger than the largest resistor"]},
+     "right": {"head": "Parallel", "bullets": ["Same voltage, currents add (KCL)", "R_{1}‖R_{2} = R_{1}R_{2}/(R_{1}+R_{2})", "Smaller than the smallest; R‖R = R/2"]},
+     "figure": "kirchhoff-s-current-law-kcl-and-voltage--1.png",
+     "notes": "KCL: charge is not lost at a node; KVL: the voltages around a loop sum to zero. For our small networks we just combine series and parallel step by step."},
+    {"type": "example", "section": "Kirchhoff's Laws and Networks", "title": "Falstad: series-parallel network",
+     "figure": null,
+     "falstad": [{"name": "network", "hint": "Hover over each resistor: current and power; check KCL at node A"}],
+     "observe": [
+       "Recipe: combine parallel, add series, total current, then go back",
+       "KCL at node A as a cheap check: I_{1} = I_{2} + I_{3}",
+       "Compare each resistor's power with a 0.25 W rating"
+     ],
+     "notes": "12 V, 100 Ω, 220 Ω ‖ 330 Ω; V_{A} = 6.83 V. Exercise 1.1 finds that R_{1} is overloaded and R_{2} runs too hot for the 50 % rule."},
+    {"type": "points", "section": "The Voltage Divider", "title": "The voltage divider and its load",
+     "bullets": [
+       "Unloaded: the voltages divide in the ratio of the resistances",
+       "Seen from the load: V_{th} = V_{0}·R_{2}/(R_{1}+R_{2}), R_{th} = R_{1}‖R_{2}",
+       "R_{L} ≥ 10·R_{th} for < 10 % error, ≥ 100·R_{th} for < 1 % (or buffer it)",
+       "Small R: stiff but high cross current; large R: sensitive to every load",
+       "Capstone ADC ladder: 8 × 1 kΩ at 4 V, loaded only by comparator inputs"
+     ],
+     "rule": "V_{out} = V_{0}·R_{2}/(R_{1}+R_{2})",
+     "figure": "unloaded-divider-1.png",
+     "falstad": [{"name": "divider_loaded", "hint": "Compare Vout_open (5.00 V) and Vout_load (3.33 V)"}],
+     "notes": "The divider is the most used circuit in the lecture. In the example 10 kΩ/10 kΩ loaded with 10 kΩ loses one third of the output (Exercise 1.2). A trimmer between two fixed resistors gives a fine adjustment; in the capstone it sets the gain for exactly 0 … 4.00 V."},
+    {"type": "points", "section": "The Voltage Divider", "title": "Current divider",
+     "bullets": [
+       "The smaller resistor takes the larger current",
+       "I_{1} = I·R_{2}/(R_{1}+R_{2}), I_{2} = I·R_{1}/(R_{1}+R_{2})",
+       "Potentiometer wiper: V_{out} = x·V_{0}; load the wiper only lightly"
+     ],
+     "rule": null,
+     "figure": "current-divider-1.png",
+     "falstad": [{"name": "current_divider", "hint": "10 mA into 1 kΩ ‖ 4.7 kΩ: read 8.25 mA and 1.75 mA"}],
+     "notes": "The current divider is the dual of the voltage divider. Mention potentiometers and trimmers briefly here; the slide 'Potentiometer: adjustable divider' in the script has the details."},
+    {"type": "points", "section": "Equivalent Sources and Superposition", "title": "Thevenin equivalent and load line",
+     "bullets": [
+       "Any linear two-terminal network = V_{th} in series with R_{th}",
+       "V_{th} = V_{oc}, R_{th} = V_{oc}/I_{sc}, or set sources to zero",
+       "Zeroed sources: voltage source → wire, current source → open",
+       "Operating point: source line V_{th} − R_{th}·I_{L} meets the load line"
+     ],
+     "rule": "R_{th} = V_{oc}/I_{sc}",
+     "figure": "load-line-of-a-real-source-1.png",
+     "falstad": [{"name": "thevenin", "hint": "VL_orig = VL_equiv = 3.10 V; short R_{L} to read I_{sc}"}],
+     "notes": "The example is the 12 V divider 2.2 kΩ/3.3 kΩ with a 1 kΩ load: 7.2 V behind 1.32 kΩ. The load line also works for nonlinear loads like LEDs. Derivation in Exercise 1.3."},
+    {"type": "example", "section": "Equivalent Sources and Superposition", "title": "Falstad: superposition",
+     "figure": "superposition-1.png",
+     "falstad": [{"name": "superposition", "hint": "Read VX1, VX2 and VX: 6.00 V + 1.25 V = 7.25 V"}],
+     "observe": [
+       "Each source alone, the other set to zero, then add the results",
+       "Only for linear circuits: fails when a diode switches or an op-amp clips",
+       "Not valid for power (quadratic in current)"
+     ],
+     "notes": "Superposition comes back for summing amplifiers and offset voltages. Exercise 1.4 checks the result with KCL and shows that the 5 V source is being charged."},
+    {"type": "points", "section": "The LED with Series Resistor", "title": "The LED: a nonlinear load",
+     "bullets": [
+       "Current rises exponentially: never connect an LED directly to a source",
+       "Model: constant V_{F}; red ≈ 2.0 V, green/blue/white (InGaN) ≈ 3.0 V",
+       "Standard LEDs ≤ 20 mA; modern ones are visible at 2 … 5 mA",
+       "Reverse voltage only about 5 V: an LED is not a rectifier"
+     ],
+     "rule": null,
+     "figure": "led-characteristic-1.png",
+     "falstad": [],
+     "notes": "V_{F} grows with photon energy. A blue LED on 3.3 V leaves only a few hundred mV for the resistor. V_{F} drops by about 2 mV/K, so an LED without resistor runs away thermally."},
+    {"type": "recipe", "section": "The LED with Series Resistor", "title": "Design recipe: LED series resistor",
+     "steps": [
+       "Take V_{F} from the datasheet at the desired current (red 2.0 V, blue 3.0 V)",
+       "Choose I_{F}: 2 … 10 mA for an indicator; check the driver's maximum",
+       "R = (V_{S} − V_{F})/I_{F}, round up to the next E12/E24 value",
+       "Recalculate I_{F}, check P_{R} = I_{F}^{2}·R against the rating"
+     ],
+     "figure": "dimensioning-the-series-resistor-1.png",
+     "notes": "Rounding up protects LED and driver. The larger V_{S} − V_{F}, the less the current depends on the spread of V_{F}. Example: 5 V, red LED, 10 mA gives 330 Ω and 9.1 mA."},
+    {"type": "example", "section": "The LED with Series Resistor", "title": "Falstad: LED on a logic output",
+     "figure": "driving-an-led-from-a-logic-output-2.png",
+     "falstad": [{"name": "led_resistor", "hint": "Read VLED (1.78 V), move the R slider, watch the blinking pair"}],
+     "observe": [
+       "Source (LED to ground, on at high) or sink (LED to supply, on at low)",
+       "74HC at 5 V: ±4 mA with guaranteed levels, 25 mA absolute maximum",
+       "330 Ω at 5 V ≈ 9 mA, 1 kΩ ≈ 3 mA"
+     ],
+     "notes": "A CMOS output acts as a switch with some 10 Ω, so the formula still applies. In the capstone the three encoder bits drive three LEDs to ground, exactly this circuit. Exercise 1.5."},
+    {"type": "points", "section": "Capacitor and RC Circuits", "title": "Capacitor and RC time constant",
+     "bullets": [
+       "I = C·dV/dt: the voltage cannot jump; at DC a charged C is an open circuit",
+       "After τ: 63 %, 3τ: 95 %, 5τ: 99.3 % (settled)",
+       "Settling to 1 %: 4.6τ; to ½ LSB of an n-bit ADC: τ·ln(2^{n+1})",
+       "Filters and hold capacitors: C0G or film, not X7R/Y5V"
+     ],
+     "rule": "V_{C}(t) = V_{0}·(1 − e^{−t/τ}), τ = RC",
+     "figure": "the-time-constant-1.png",
+     "falstad": [{"name": "rc_charging", "hint": "10 kΩ, 10 µF, τ = 0.1 s: read 3.16 V at 0.1 s on the scope"}],
+     "notes": "The 3-bit capstone converter needs 2.8τ, a 12-bit converter 9τ; that is why acquisition time is always given with an accuracy. Exercise 1.6 reads the charging and discharging values from the scope."},
+    {"type": "points", "section": "Capacitor and RC Circuits", "title": "Preview: the RC low-pass",
+     "bullets": [
+       "Slow signals pass, fast ones are attenuated: −20 dB per decade above f_{c}",
+       "At f_{c}: amplitude 0.707 (−3 dB), phase −45°",
+       "Capstone anti-aliasing: f_{c} = 2.34 Hz with 6.8 kΩ and 10 µF"
+     ],
+     "rule": "f_{c} = 1/(2π·R·C)",
+     "figure": "charging-through-a-resistor-1.png",
+     "falstad": [{"name": "rc_lowpass", "hint": "1 kHz sine at f_{c} = 995 Hz: output 0.705 V, lags ≈ ¼ period"}],
+     "notes": "The same RC circuit seen in the frequency domain. The chapter Active Filters treats filters in detail. Change the source frequency in Falstad and watch the amplitude."},
+    {"type": "compare", "section": "Working with Falstad", "title": "Working with Falstad",
+     "left": {"head": "Pitfalls", "bullets": ["Wires connect only at end points", "Every circuit needs a ground", "Singular matrix: floating node"]},
+     "right": {"head": "Measuring", "bullets": ["Hover: V, I and P bottom right", "Right click → View in New Scope", "Sliders for the values worth changing"]},
+     "figure": null,
+     "notes": "Open falstad.com/circuit/circuitjs.html, import an example via File → Import From Text. Show led_resistor live: hover over VLED and the resistor. Circuits with capacitors need a few time constants before the values settle."}
+  ],
+  "exercises": [
+    "Exercise 1.1: Power in a series-parallel network",
+    "Exercise 1.2: Loaded voltage divider",
+    "Exercise 1.3: Thevenin equivalent from open-circuit voltage and short-circuit current",
+    "Exercise 1.4: Superposition",
+    "Exercise 1.5: LED on a 5 V logic output",
+    "Exercise 1.6: RC charging"
+  ]
+}

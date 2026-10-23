@@ -1,0 +1,73 @@
+{
+  "chapter": "Op-Amp Basics",
+  "file": "OpAmpBasics",
+  "number": 2,
+  "subtitle": "The minimum op-amp knowledge: golden rules, buffer, non-inverting amplifier",
+  "takeaways": [
+    "Negative feedback: V_{+} = V_{-}, no input current",
+    "A buffer stops one stage loading the next",
+    "Check input and output range before any formula"
+  ],
+  "slides": [
+    {"type": "points", "section": "The Op-Amp in a Nutshell", "title": "Op-amp and the golden rules",
+     "bullets": [
+       "Amplifies the difference V_{+} − V_{-} with a huge gain A = 10^{5} … 10^{7}",
+       "Without feedback it is a comparator (flash ADC)",
+       "Negative feedback: part of V_{out} goes back to the inverting input",
+       "Rule 1: the output makes V_{+} = V_{-}; rule 2: inputs draw no current"
+     ],
+     "rule": "V_{+} = V_{-}, I_{+} = I_{-} = 0 (with negative feedback)",
+     "figure": null,
+     "falstad": [],
+     "notes": "With A = 10^{5} and 5 V out, the input difference is only 50 µV. Rule 1 holds only while the loop works: output not at a rail, feedback to the inverting input. Real inputs draw pA (CMOS) to some 10 nA (bipolar)."},
+    {"type": "compare", "section": "The Op-Amp in a Nutshell", "title": "Real op-amps on a single supply",
+     "left": {"head": "CMOS rail-to-rail", "bullets": ["MCP6002, TLV9002 at 5 V", "Output within ~10 mV of the rails", "Inputs up to the supply"]},
+     "right": {"head": "Bipolar LM358", "bullets": ["Up to 32 V supply", "Output ~1.5 V below the + rail", "Inputs only up to V_{S} − 1.5 V"]},
+     "figure": null,
+     "notes": "Most lab circuits run from 5 V or 12 V and ground. The input common-mode range and the output swing are the first things to check in every op-amp circuit; the golden rules only hold inside them. Output current is typically 10 … 40 mA, short-circuit protected."},
+    {"type": "points", "section": "The Unity-Gain Buffer", "title": "Loading and the voltage follower",
+     "bullets": [
+       "Every connection: R_{out} of stage A and R_{in} of stage B form a divider",
+       "Error ≈ R_{out}/R_{in}: need R_{in} ≥ 100·R_{out} for < 1 %",
+       "Follower: V_{out} = V_{in}, R_{in} → ∞ (GΩ … TΩ), R_{out} → 0",
+       "Stage A is not loaded, stage B sees an ideal source"
+     ],
+     "rule": "V_{B} = V_{A}·R_{in}/(R_{in}+R_{out})",
+     "figure": "every-connection-is-a-voltage-divider-1.png",
+     "falstad": [],
+     "notes": "Replace stage A by its Thevenin equivalent from chapter 1: a divider has R_{out} = R_{1}‖R_{2}. If R_{in} ≫ R_{out} cannot be met, put a buffer in between. Its load current comes from the supply, not from stage A."},
+    {"type": "example", "section": "The Unity-Gain Buffer", "title": "Falstad: buffering a potentiometer",
+     "figure": "the-voltage-follower-1.png",
+     "falstad": [{"name": "buffer_pot", "hint": "Compare V_direct (0.714 V) with V_buffered (2.50 V)"}],
+     "observe": [
+       "10 kΩ pot at mid position: 2.5 V behind R_{out} = 2.5 kΩ",
+       "1 kΩ directly at the wiper collapses it; behind the follower: 2.50 V",
+       "Use the slider: how large must R_{L} be without a buffer?"
+     ],
+     "notes": "The op-amp delivers 2.5 mA from the 5 V supply, the wiper delivers nothing. Without buffer R_{L} would need 250 kΩ for 1 % error. Exercise 2.1, including why an LM358 fails near 5 V."},
+    {"type": "example", "section": "The Unity-Gain Buffer", "title": "Falstad: two RC low-passes in cascade",
+     "figure": "example-two-rc-low-passes-in-cascade-1.png",
+     "falstad": [{"name": "buffer_rc_cascade", "hint": "Scope at f_{c} = 159 Hz: 0.500 V buffered vs 0.333 V direct"}],
+     "observe": [
+       "With buffer: H = H_{1}·H_{2}, −6 dB at f_{c}",
+       "Directly connected: −9.5 dB, lower corner, softer knee",
+       "Buffered stages can be designed one by one (active filters)"
+     ],
+     "notes": "Each stage is 10 kΩ and 100 nF. Without the buffer the second stage draws current from the first capacitor, so the product formula is no longer valid. This is the idea behind the chapter Active Filters."},
+    {"type": "points", "section": "The Non-Inverting Amplifier", "title": "Non-inverting amplifier and buffer limits",
+     "bullets": [
+       "R_{1}, R_{2} feed back part of V_{out}; R_{2} = 0 gives the follower",
+       "Gain set only by the resistor ratio: 1 % resistors → about 2 % gain error",
+       "Limits: output current, swing and input common-mode range",
+       "Capacitive load may oscillate: add 50 … 100 Ω in series with the output",
+       "Offset: V_{out} = V_{in} + V_{OS} (µV … mV)"
+     ],
+     "rule": "G = 1 + R_{2}/R_{1}",
+     "figure": "non-inverting-amplifier-1.png",
+     "falstad": [],
+     "notes": "Input resistance stays near infinite, so the source is still not loaded. Buffers appear behind references, at bridge taps, between filter stages and behind the hold capacitor. The chapter Operational Amplifiers derives the inverting amplifier and the effect of finite gain."}
+  ],
+  "exercises": [
+    "Exercise 2.1: Buffering a potentiometer"
+  ]
+}

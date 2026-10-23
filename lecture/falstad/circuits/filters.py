@@ -1,4 +1,4 @@
-"""Falstad examples for chapter 6: Active Filters."""
+"""Falstad examples for chapter 7: Active Filters."""
 import math
 
 import numpy as np

@@ -11,21 +11,23 @@ example circuit also exists as a Falstad simulation.
 | `examples/` | Falstad circuits for each chapter (`.txt`, plus README with browser links) |
 | `falstad/` | Python generator and checker for the Falstad circuits |
 | `links/` | generated: Falstad links for the LaTeX sources |
-| `pdf/` | built PDFs (`make publish`) |
+| `pdf/` | built PDFs (`make publish`) and the PowerPoint deck (`make pptx`) |
+| `pptx/` | condensed PowerPoint deck: chapter outlines and generator (see `pptx/README.md`) |
 | `fonts/` | Barlow Semi Condensed, the RWU font (SIL OFL) |
 | `AUTHORING.md` | conventions for writing chapters and circuits |
 
 ## Chapters
 
 1. Basics
-2. Voltage and Current Sources
-3. Voltage References
-4. Bridge Circuits
-5. Operational Amplifiers
-6. Active Filters
-7. Sample and Hold
-8. Analog-to-Digital Conversion
-9. From Sensor to Digital Value (capstone: complete chain from a Pt100 bridge to a 3-bit code)
+2. Op-Amp Basics (golden rules, unity-gain buffer, non-inverting amplifier)
+3. Voltage and Current Sources (incl. op-amp voltage and current sources)
+4. Voltage References
+5. Bridge Circuits
+6. Operational Amplifiers
+7. Active Filters
+8. Sample and Hold
+9. Analog-to-Digital Conversion
+10. From Sensor to Digital Value (capstone: complete chain from a Pt100 bridge to a 3-bit code)
 
 ## Build
 
@@ -36,7 +38,10 @@ make script     only the script (with solutions)
 make students   the script without solutions
 make slides     only the slides
 make ch CH=ADC  one chapter -> build/ch-ADC-script.pdf, build/ch-ADC-slides.pdf
-make publish    build everything and copy the PDFs into pdf/
+make chapters   the script split by chapter -> pdf/chapters/CircuitDesign_NN_<File>.pdf
+                (and ..._Students.pdf without solutions)
+make pptx       condensed PowerPoint deck -> pdf/CircuitDesign_Slides_Practical.pptx
+make publish    build everything (incl. chapters) and copy the PDFs into pdf/
 make clean      remove LaTeX build artifacts
 ```
 

@@ -1,4 +1,4 @@
-"""Falstad examples for chapter 3: Voltage References."""
+"""Falstad examples for chapter 4: Voltage References."""
 from falstad import Circuit, Elm, Sim
 from _check import approx
 

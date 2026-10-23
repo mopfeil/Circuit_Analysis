@@ -41,7 +41,7 @@ capstone task \cite{tietze2008,kester2005}.\newpage}
 \end{center}
 \keyeq{Bridge output}{$\displaystyle V_d = V_A - V_B = V_B\left(\frac{R_2}{R_1+R_2}-\frac{R_4}{R_3+R_4}\right)$}
 \nsl{Here $V_B$ is the excitation (supply) voltage of the bridge. Each
-leg is an unloaded voltage divider from chapter~1; the output is the
+leg is an unloaded voltage divider from chapter~\ref{ch:Basics}; the output is the
 difference of the two tap voltages. The output is taken between two nodes
 of which neither is at ground: a \emph{differential} voltage.}
 \os{\newpage}
@@ -60,7 +60,7 @@ of which neither is at ground: a \emph{differential} voltage.}
 balance the output is proportional to $V_B$: the bridge converts a
 relative resistance change into a fraction of the excitation voltage.
 This is why the excitation must be a stable reference, or the measurement
-must be ratiometric (chapter~3).}
+must be ratiometric (chapter~\ref{ch:References}).}
 \os{\newpage}
 \end{description}
 
@@ -204,7 +204,7 @@ $V_B = \SI{5}{\volt}$.
 \ta $x = k\varepsilon = 2\cdot 10^{-3}$, $\Delta R = 0.002\cdot\SI{350}{\ohm} = \SI{0.7}{\ohm}$.
 \ta Quarter: $V_d = 5\,(350.7/700.7 - 0.5) = \SI{2.4975}{\milli\volt}$ ($\approx\frac54\cdot 0.002 = \SI{2.5}{\milli\volt}$);
 	half: $\frac52\cdot 0.002 = \SI{5.00}{\milli\volt}$; full: $5\cdot 0.002 = \SI{10.0}{\milli\volt}$.
-\ta $G = \SI{2}{\volt}/\SI{10}{\milli\volt} = 200$, with an instrumentation amplifier (chapter~5).
+\ta $G = \SI{2}{\volt}/\SI{10}{\milli\volt} = 200$, with an instrumentation amplifier (chapter~\ref{ch:OpAmps}).
 \item[] \falstad{bridge_types}:\newline the three voltmeters show \SI{2.50}{\milli\volt}, \SI{5.00}{\milli\volt} and \SI{10.0}{\milli\volt}.
 \end{talist}
 \end{solution}
@@ -322,7 +322,7 @@ Pt100 for \SIrange{0}{100}{\celsius}, a sensor current of at most
 \SI{1}{\milli\ampere}, zero output at \SI{0}{\celsius}, and an amplifier
 that produces exactly \SI{4.00}{\volt} at \SI{100}{\celsius}. The bridge is
 excited from the \SI{4.00}{\volt} reference that also feeds the ladder of
-the flash converter, so that the measurement is ratiometric (chapter~3).
+the flash converter, so that the measurement is ratiometric (chapter~\ref{ch:References}).
 The same design is used in the capstone chapter.\newpage}
 
 \begin{description}
@@ -499,7 +499,7 @@ cannot do this.\newpage}
 \bi
 	\ite difference amplifier: amplifies $V_S - V_R$, rejects $V_\mathrm{CM}$ (if the resistors match)
 	\ite buffers: no current from the bridge, the bridge is not loaded
-	\ite second stage $G_2 = 10.76$: \SI{0}{\volt} \ldots\ \SI{4.00}{\volt} \quad (details: chapter~5)
+	\ite second stage $G_2 = 10.76$: \SI{0}{\volt} \ldots\ \SI{4.00}{\volt} \quad (details: chapter~\ref{ch:OpAmps})
 \ei
 \falstad{bridge_ina}
 \nsl{\par Without the buffers the difference amplifier would load the bridge
@@ -509,7 +509,7 @@ $\SI{3.9}{\kilo\ohm}\parallelto\SI{100}{\ohm} = \SI{97.5}{\ohm}$, so
 and worse, a mismatch between the two inputs that converts common-mode
 voltage into an output error. The two buffers and the difference amplifier
 together form the classic three-op-amp instrumentation amplifier (INA),
-treated in chapter~5. In Falstad the complete front end delivers
+treated in chapter~\ref{ch:OpAmps}. In Falstad the complete front end delivers
 \SI{0}{\volt}, \SI{2.01}{\volt} and \SI{4.00}{\volt} at \SI{0}{\celsius},
 \SI{50}{\celsius} and \SI{100}{\celsius}.}
 \os{\newpage}
@@ -553,8 +553,8 @@ the cable adds to the sensor resistance. For a Pt100 one ohm corresponds to
 induced voltages of neighbouring twists cancel. A shield connected to
 ground at the amplifier side diverts capacitively coupled currents. What
 remains must be removed by filtering: the temperature changes slowly, so
-everything above a few hertz can be cut off. Chapter~6 designs the
-anti-aliasing filter and chapter~7 shows what happens if the interference
+everything above a few hertz can be cut off. Chapter~\ref{ch:Filters} designs the
+anti-aliasing filter and chapter~\ref{ch:SampleHold} shows what happens if the interference
 reaches the sampler unfiltered.}
 \os{\newpage}
 

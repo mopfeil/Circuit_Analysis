@@ -1,5 +1,7 @@
 # Build the lecture script (docu.pdf), the script without solutions
-# (docu_students.pdf) and the slides (slides.pdf).
+# (docu_students.pdf), the slides (slides.pdf), one script PDF per
+# chapter (pdf/chapters/, "make chapters") and the condensed PowerPoint
+# deck (pdf/CircuitDesign_Slides_Practical.pptx, "make pptx").
 # Requires TeX Live with latexmk and lualatex, and python3 with numpy for
 # the Falstad examples. The RWU font Barlow Semi Condensed is shipped in
 # fonts/ and needs lualatex; "make PDFTEX=1" builds with pdflatex instead.
@@ -10,7 +12,7 @@ else
 LATEXMK = latexmk -lualatex -interaction=nonstopmode -halt-on-error
 endif
 
-.PHONY: all script students slides falstad ch publish sync clean
+.PHONY: all script students slides falstad ch chapters pptx publish sync clean
 
 all: falstad script students slides
 
@@ -32,8 +34,38 @@ ch:
 	$(LATEXMK) -outdir=build -jobname=ch-$(CH)-script -usepretex='\def\onlychapter{$(CH)}' docu.tex
 	$(LATEXMK) -outdir=build -jobname=ch-$(CH)-slides -usepretex='\def\onlychapter{$(CH)}' slides.tex
 
+# The script split into one PDF per chapter, with and without solutions:
+# pdf/chapters/CircuitDesign_<NN>_<File>.pdf and ..._Students.pdf
+# (chapter list and order from text.tex)
+CHAPTERS := $(shell sed -n 's/^\\chap{[^}]*}{\([^}]*\)}.*/\1/p' text.tex)
+
+chapters:
+	mkdir -p pdf/chapters
+	n=0; for c in $(CHAPTERS); do \
+	  n=$$((n+1)); nn=$$(printf %02d $$n); \
+	  $(LATEXMK) -outdir=build -jobname=ch-$$c-script -usepretex="\def\onlychapter{$$c}" docu.tex && \
+	  $(LATEXMK) -outdir=build -jobname=ch-$$c-students -usepretex="\def\onlychapter{$$c}\def\nosolutions{}" docu.tex && \
+	  cp build/ch-$$c-script.pdf pdf/chapters/CircuitDesign_$${nn}_$$c.pdf && \
+	  cp build/ch-$$c-students.pdf pdf/chapters/CircuitDesign_$${nn}_$${c}_Students.pdf || exit 1; \
+	done
+
+# Condensed PowerPoint deck: practical points and all Falstad examples,
+# from pptx/outline/*.json and the figures in slides.pdf (see pptx/README.md).
+# The Python packages go into a local venv (pptx/.venv) on the first run.
+PPTX_PY = pptx/.venv/bin/python
+
+pptx/.venv/installed: pptx/requirements.txt
+	python3 -m venv pptx/.venv
+	$(PPTX_PY) -m pip install -q -r pptx/requirements.txt
+	touch $@
+
+pptx: slides pptx/.venv/installed
+	rm -rf build/pptx/figs
+	$(PPTX_PY) pptx/extract_figs.py slides.pdf build/pptx/figs
+	$(PPTX_PY) pptx/build_deck.py -o pdf/CircuitDesign_Slides_Practical.pptx $(if $(PREVIEW),--preview build/pptx/preview)
+
 # Copy the built PDFs into pdf/
-publish: all
+publish: all chapters
 	mkdir -p pdf
 	cp docu.pdf pdf/CircuitDesign_Script.pdf
 	cp docu_students.pdf pdf/CircuitDesign_Script_Students.pdf

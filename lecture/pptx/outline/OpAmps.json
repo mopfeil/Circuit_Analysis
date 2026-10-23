@@ -1,0 +1,261 @@
+{
+ "chapter": "Operational Amplifiers",
+ "file": "OpAmps",
+ "number": 6,
+ "subtitle": "Basic op-amp circuits, real limits, and the capstone measurement amplifier",
+ "takeaways": [
+  "Negative feedback: the resistors set the gain",
+  "Use an INA for bridges; resistor matching sets CMRR",
+  "Keep G < 100 per stage; watch offset and headroom"
+ ],
+ "slides": [
+  {
+   "type": "points",
+   "section": "The Ideal Operational Amplifier",
+   "title": "Op-amp and the golden rules",
+   "bullets": [
+    "Amplifies V_{+} − V_{−} with A = 10^{5} … 10^{7}; output stays inside supply",
+    "Open loop: ±135 µV linear range, else a rail → comparator",
+    "Negative feedback to the inverting input pulls V_{+} − V_{−} to ≈ 0",
+    "Rule 1 holds only while the output is not saturated"
+   ],
+   "rule": "With negative feedback: V_{+} = V_{−} and I_{+} = I_{−} = 0",
+   "figure": "open-loop-the-op-amp-as-a-comparator-1.png",
+   "falstad": [],
+   "notes": "The plot shows the open-loop transfer: a few hundred microvolts saturate the output. Golden rules from Horowitz/Hill; the property table ideal vs. real is in section The Ideal Operational Amplifier."
+  },
+  {
+   "type": "points",
+   "section": "Basic Amplifier Circuits",
+   "title": "Voltage follower: buffer the source",
+   "bullets": [
+    "V_{out} = V_{in}, gain 1; input current ≈ 0, output low impedance",
+    "100k/100k divider with 10 kΩ load: 0.833 V instead of 5 V",
+    "Behind a follower: 5.00 V, the divider does not notice the load",
+    "Used at bridge taps, ADC reference ladder, S&H hold capacitor"
+   ],
+   "rule": null,
+   "figure": "voltage-follower-buffer-1.png",
+   "falstad": [
+    {
+     "name": "opamp_follower",
+     "hint": "Compare the loaded divider (0.833 V) with the buffered one (5.00 V)"
+    }
+   ],
+   "notes": "The follower amplifies current, not voltage: it copies a high-impedance node to a low-impedance output."
+  },
+  {
+   "type": "compare",
+   "section": "Basic Amplifier Circuits",
+   "title": "Non-inverting vs. inverting amplifier",
+   "left": {
+    "head": "Non-inverting",
+    "bullets": [
+     "G = 1 + R_{2}/R_{1}, in phase",
+     "Input resistance ≈ ∞",
+     "Gain ≥ 1 only"
+    ]
+   },
+   "right": {
+    "head": "Inverting",
+    "bullets": [
+     "G = −R_{2}/R_{1}, 180° phase",
+     "V_{−} is a virtual ground",
+     "Input resistance = R_{1} (loads source)"
+    ]
+   },
+   "figure": "non-inverting-amplifier-1.png",
+   "notes": "Both follow from the two golden rules in two lines. The figure shows the non-inverting amplifier: R1 and R2 divide the output back to the inverting input."
+  },
+  {
+   "type": "example",
+   "section": "Basic Amplifier Circuits",
+   "title": "Falstad: G = 3 and G = −2",
+   "figure": "non-inverting-and-inverting-in-falstad-1.png",
+   "falstad": [
+    {
+     "name": "opamp_noninv_inv",
+     "hint": "Scope: ±1.50 V in phase and ±1.00 V inverted for 0.5 V in"
+    }
+   ],
+   "observe": [
+    "Same R_{1} = 10 kΩ, R_{2} = 20 kΩ in both circuits",
+    "Non-inverting: 1.5 V, in phase; inverting: 1.0 V, inverted",
+    "Try R_{2} = 47 kΩ for an inverting gain of −4.7"
+   ],
+   "notes": "Input 0.5 V amplitude at 1 kHz. Exercise 6.1 asks for gains, amplitudes and input resistances."
+  },
+  {
+   "type": "points",
+   "section": "Basic Amplifier Circuits",
+   "title": "Summing amplifier",
+   "bullets": [
+    "Virtual ground decouples the inputs; currents add up in R_{f}",
+    "Weight of input k: −R_{f}/R_{k}",
+    "Uses: audio mixer, weighted DAC, adding an offset (level shift)"
+   ],
+   "rule": "V_{out} = −R_{f}·(V_{1}/R_{1} + V_{2}/R_{2} + V_{3}/R_{3})",
+   "figure": "summing-amplifier-1.png",
+   "falstad": [
+    {
+     "name": "opamp_summing",
+     "hint": "Vout = −1.50 V, summing node stays at 0.00 V"
+    }
+   ],
+   "notes": "Inputs 1 V via 10 kΩ, 2 V via 20 kΩ and −0.5 V via 10 kΩ with Rf = 10 kΩ. Exercise 6.2."
+  },
+  {
+   "type": "points",
+   "section": "Difference and Instrumentation Amplifiers",
+   "title": "Difference amplifier and CMRR",
+   "bullets": [
+    "With R_{4}/R_{3} = R_{2}/R_{1}: V_{out} = (R_{2}/R_{1})·(V_{1} − V_{2})",
+    "CMRR = A_{D}/A_{CM}; set by resistor matching, not the op-amp",
+    "G = 10, R_{4} 1 % high: 72.6 mV instead of 50.0 mV (+45 %)",
+    "Remedy: 0.1 % or matched networks, trimmer, integrated diff. amp"
+   ],
+   "rule": "Worst case: CMRR ≈ (1 + G)/(4ε), 1 % parts, G = 10: ≈ 275 (49 dB)",
+   "figure": "difference-amplifier-1.png",
+   "falstad": [
+    {
+     "name": "opamp_diffamp",
+     "hint": "Matched 50.0 mV vs. 1 % mismatch 72.6 mV at 2.5 V common mode"
+    }
+   ],
+   "notes": "A symmetric bridge has 2.5 V common mode and some 10 mV signal, so a tiny common-mode gain is a big error. The input resistances are unequal and low: the circuit loads a bridge. Exercise 6.3."
+  },
+  {
+   "type": "points",
+   "section": "Difference and Instrumentation Amplifiers",
+   "title": "Instrumentation amplifier (INA)",
+   "bullets": [
+    "A1, A2 non-inverting: inputs draw no current, bridge not loaded",
+    "Input stage: differential gain 1 + 2R/R_{G}, common mode gain 1",
+    "A3 difference stage removes the common mode",
+    "One R_{G} sets the gain: INA128, AD620, AD8221 (CMRR ≥ 100 dB)",
+    "Lab version: two followers + difference amp, all gain from R_{2}/R_{1}"
+   ],
+   "rule": "V_{out} = (1 + 2R/R_{G})·(R_{2}/R_{1})·(V_{1} − V_{2})",
+   "figure": "instrumentation-amplifier-three-op-amps-1.png",
+   "falstad": [],
+   "notes": "The input stage improves the CMRR by the factor 1 + 2R/R_G. The lab circuit uses gain one in the buffers, so matching of R1 to R4 alone sets the CMRR."
+  },
+  {
+   "type": "points",
+   "section": "Limits of Real Op-Amps",
+   "title": "Finite gain and bandwidth",
+   "bullets": [
+    "Gain error ≈ −G/A: A = 10^{5}, G = 1000 → −1 %, G = 10000 → −9.1 %",
+    "Split the gain: 10·100 → −0.11 %; rule of the lab: G < 100 per stage",
+    "Bandwidth f_{c} ≈ GBW/G: 1 MHz/100 = 10 kHz",
+    "Falstad has constant A = 10^{5}: no GBW, no slew rate"
+   ],
+   "rule": "G_{real} = G/(1 + G/A);  GBW = A(f)·f = G·f_{c}",
+   "figure": "gain-bandwidth-product-1.png",
+   "falstad": [
+    {
+     "name": "opamp_finite_gain",
+     "hint": "One stage 0.990 V / 9.09 V vs. two stages 0.999 V / 9.98 V"
+    }
+   ],
+   "notes": "At 1 kHz a 1 MHz op-amp has only A = 1000, so a G = 100 stage is 10 % low; check fast circuits against the data sheet. The capstone signal is a few hertz, so GBW is no problem there. Exercise 6.4."
+  },
+  {
+   "type": "points",
+   "section": "Limits of Real Op-Amps",
+   "title": "Output swing and single supply",
+   "bullets": [
+    "Classic op-amp stays 1 … 2 V from the rails (LM358 at 5 V: 0 … 3.5 V)",
+    "Rail-to-rail output: within 10 mV … a few 100 mV of the rails",
+    "Check input common-mode range too: capstone bridge sits at 0.1 V",
+    "Single supply: bias bipolar signals to V_{S}/2, ±2 V → 0.5 … 4.5 V",
+    "Clipping cannot be repaired later: leave headroom for interference"
+   ],
+   "rule": null,
+   "figure": null,
+   "falstad": [
+    {
+     "name": "opamp_level_shift",
+     "hint": "Shifted output 0.5 … 4.5 V vs. the follower clipping below 0 V"
+    }
+   ],
+   "notes": "Exactly 0 V output is impossible on a single 5 V supply: use a negative rail or an offset range like 0.1 to 4.1 V. A clipped 50 Hz interference turns into a DC error after the low-pass filter."
+  },
+  {
+   "type": "points",
+   "section": "Limits of Real Op-Amps",
+   "title": "Offset voltage and bias current",
+   "bullets": [
+    "LM358: V_{OS} ≈ 2 mV, I_{B} ≈ 20 nA; CMOS: ≈ 1 mV, ≈ 1 pA",
+    "Zero-drift (OPA2333, MCP6V02): V_{OS} < 10 µV",
+    "Capstone: 2 mV × 107.6 = 0.22 V, 5 % of full scale, almost ½ LSB",
+    "Remedies: zero-drift or CMOS op-amp, low R_{S}, offset trimming"
+   ],
+   "rule": "V_{out} = (1 + R_{2}/R_{1})·(V_{OS} + R_{S}·I_{B})",
+   "figure": "input-offset-voltage-and-bias-currents-1.png",
+   "falstad": [
+    {
+     "name": "opamp_offset",
+     "hint": "G = 101: 1 mV offset → 0.101 V; 100 nA via 100 kΩ → −1.01 V"
+    }
+   ],
+   "notes": "Falstad's op-amp has no offset or bias current; the example models them with an extra voltage and current source. With the 100 Ω bridge source resistance I_B matters little, but behind a hold capacitor it does. Exercise 6.5."
+  },
+  {
+   "type": "points",
+   "section": "Designing the Measurement Amplifier",
+   "title": "Capstone signal chain",
+   "bullets": [
+    "Pt100 bridge at 4.00 V: V_{BR} = 0 … 37.18 mV",
+    "Total gain G = 4.00 V/37.18 mV = 107.6 = 10 × 10.76",
+    "Stage 1: buffers + difference amp 100k/10k; stage 2: G_{2} = 10.76",
+    "Zero set by the bridge (R_{4} = 100 Ω), span by R_{F} in stage 2",
+    "Common mode only 0.1 V: op-amp inputs must work near the low rail"
+   ],
+   "rule": null,
+   "figure": null,
+   "falstad": [],
+   "notes": "The following low-pass, S&H and 3-bit flash ADC expect exactly 0 to 4 V, so one LSB is 0.5 V. In hardware R_F is 91 kΩ plus a 10 kΩ trimmer (G2 = 10.1 to 11.1); Falstad uses the E96 value 97.6 kΩ or the trimmer at 6.6 kΩ."
+  },
+  {
+   "type": "recipe",
+   "section": "Designing the Measurement Amplifier",
+   "title": "Design recipe: zero and span",
+   "steps": [
+    "Bridge span V_{BR,max} and total gain G = V_{FS}/V_{BR,max} (107.6)",
+    "Split: G_{1} = 10 (buffers + diff. amp), G_{2} = G/G_{1} = 10.76",
+    "R_{F} = fixed part + trimmer: 91 kΩ + 10 kΩ",
+    "Zero: sensor at 100 Ω, check 0.00 V; correct via R_{4} or V_{REF}",
+    "Span: sensor at 138.5 Ω, trim to 4.00 V; then check the zero again"
+   ],
+   "figure": "zero-adjustment-at-the-reference-input-1.png",
+   "notes": "Zero first, then span: the span trimmer scales any remaining offset. The REF pin must be driven from a low impedance, as in the figure, or it spoils R4 and the CMRR."
+  },
+  {
+   "type": "example",
+   "section": "Designing the Measurement Amplifier",
+   "title": "Falstad: the complete front end",
+   "figure": null,
+   "falstad": [
+    {
+     "name": "opamp_ina",
+     "hint": "Pt100 at 100 Ω → 0.00 V; at 138.5 Ω → V_diff 372 mV, Vout 4.00 V"
+    }
+   ],
+   "observe": [
+    "V_{R} = 0.100 V, V_{BR} = 37.18 mV, V_{diff} = 372 mV at 138.5 Ω",
+    "50 Hz, 5 mV in series: 0.52 V at the output, no CMRR helps",
+    "Output needs headroom: 4 V + 0.52 V peak; low-pass must remove it"
+   ],
+   "notes": "This is Exercise 6.6, the capstone amplifier. The 50 Hz interference is differential, so only the filter of the next chapter can remove it, below LSB/2 = 0.25 V."
+  }
+ ],
+ "exercises": [
+  "Exercise 6.1: Non-inverting and inverting amplifier",
+  "Exercise 6.2: Summing amplifier",
+  "Exercise 6.3: Difference amplifier and resistor matching",
+  "Exercise 6.4: Finite open-loop gain",
+  "Exercise 6.5: Offset voltage and bias current",
+  "Exercise 6.6: Capstone: instrumentation amplifier with 4.00 V full scale"
+ ]
+}

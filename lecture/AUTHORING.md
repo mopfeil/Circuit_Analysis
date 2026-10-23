@@ -168,10 +168,29 @@ Gotchas (the simulator checks most of them and fails the build):
 - Lay circuits out readably: signal flow left to right, supply on top,
   ground at the bottom, a `text()` title, values visible.
 
+## Chapters and cross-references
+
+`text.tex` lists the chapters as `\chap{Title}{File}`; their order there is
+the chapter order everywhere (script, slides, `make chapters`). Each chapter
+gets the label `ch:<File>`. Never write chapter numbers by hand: use
+`chapter~\ref{ch:OpAmps}`, which also works in the single-chapter PDFs.
+References to sections, exercises or equations of *other* chapters do not
+resolve in the single-chapter PDFs; refer to the chapter instead.
+
+A new chapter also needs its Falstad module in `ORDER` of
+`falstad/build_all.py` and in the chapter list in `macros.tex`.
+
 ## Building
 
 ```
 make falstad          all examples (python3, numpy)
 make ch CH=Bridges    one chapter -> build/ch-Bridges-script.pdf / -slides.pdf
+make chapters         script split by chapter -> pdf/chapters/
 make                  everything: docu.pdf, docu_students.pdf, slides.pdf
 ```
+
+## PowerPoint deck
+
+`pptx/outline/<File>.json` holds the condensed slide content of each
+chapter (`make pptx`, see `pptx/README.md`). When you change a chapter's
+practical points, numbers or Falstad examples, update its outline too.

@@ -2,16 +2,25 @@
 % List of chapters. \chap{Title}{File}
 % "make ch CH=File" builds only one chapter (\onlychapter is set by make).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Every chapter gets the label ch:<File>, so "chapter~\ref{ch:ADC}" also
+% works in a single-chapter build.
+\makeatletter
 \providecommand{\chap}[2]{%
   \ifdefined\onlychapter
     \def\chapfile{#2}%
-    \ifx\chapfile\onlychapter \chapter{#1}\input{#2}%
-    \else \refstepcounter{chapter}\fi
+    \ifx\chapfile\onlychapter
+      \chapter{#1}\label{ch:#2}%
+      % title for the cover of the single-chapter PDF (read on the next run)
+      \protected@write\@auxout{}{\gdef\string\onlychaptertitle{Chapter \thechapter: #1}}%
+      \input{#2}%
+    \else \refstepcounter{chapter}\label{ch:#2}\fi
   \else
-    \chapter{#1}\input{#2}%
+    \chapter{#1}\label{ch:#2}\input{#2}%
   \fi}
+\makeatother
 
 \chap{Basics}{Basics}
+\chap{Op-Amp Basics}{OpAmpBasics}
 \chap{Voltage and Current Sources}{Sources}
 \chap{Voltage References}{References}
 \chap{Bridge Circuits}{Bridges}

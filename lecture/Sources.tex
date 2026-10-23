@@ -337,7 +337,7 @@ Use a \SI{5.6}{\volt} Zener diode with $I_{Z,\min}=\SI{5}{\milli\ampere}$.
 \end{solution}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Series Regulators}
+\section{Series Regulators}\label{sec:sources-series}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \nsl{The shunt regulator wastes current and cannot deliver large load
 currents. A series regulator puts a transistor between input and output.
@@ -385,7 +385,7 @@ changes by only \SI{4}{\milli\volt}; most of the change comes from
 $V_{BE}$, which grows by $V_T\ln 10 = \SI{60}{\milli\volt}$ for ten times
 the current. An op-amp that compares the output with the reference and
 drives the transistor removes this error: that is the principle of the
-integrated regulator.}
+integrated regulator (section~\ref{sec:opamp-vsource}).}
 \os{\newpage}
 
 \item[{\rot\bf Integrated fixed regulator 78xx}]~\\[-\lblskip]
@@ -483,6 +483,136 @@ from $V_\mathrm{in}=\SI{12}{\volt}$. The load is $R_L=\SI{47}{\ohm}$.
     (With E96: $R_2 = \SI{715}{\ohm}$ gives \SI{4.97}{\volt}.)
 \ta $V_\mathrm{in} \ge \SI{7.2}{\volt}$. $P = (\SI{12}{\volt}-\SI{5.2}{\volt})\cdot\SI{0.3}{\ampere} = \SI{2.0}{\watt}$: TO-220 with heat sink.
 \ta $R = \SI{1.25}{\volt}/\SI{20}{\milli\ampere} = \SI{62.5}{\ohm}$ $\Rightarrow$ E24: \SI{62}{\ohm} (\SI{20.2}{\milli\ampere}); the LM317 then needs $V_\mathrm{in} \ge V_\mathrm{LEDs} + \SI{1.25}{\volt} + \SI{2}{\volt}$.
+\end{talist}
+\end{solution}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Op-Amp Voltage Sources}\label{sec:opamp-vsource}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\nsl{The emitter follower regulator loses about \SI{0.1}{\volt} between
+light and full load, because $V_{BE}$ changes with the current. An op-amp
+removes this error. It compares the output voltage, divided by $R_1$ and
+$R_2$, with a reference voltage and drives the output until both are
+equal (golden rule~1, chapter~\ref{ch:OpAmpBasics}). The reference only
+sees the op-amp input and is not loaded at all. The output voltage is set
+by a resistor ratio, and the output resistance is a few milliohms. For
+load currents above some \SI{10}{\milli\ampere} a transistor inside the
+feedback loop boosts the output current. Reference, error amplifier and
+series transistor are exactly the blocks of every integrated linear
+regulator.\newpage}
+
+\begin{description}
+\item[{\rot\bf Reference and non-inverting amplifier}]~\\[-\lblskip]
+\begin{center}
+\begin{circuitikz}[scale=0.9, transform shape]
+  \draw (0,0) node[op amp, noinv input up](A){};
+  \coordinate (X) at ($(A.out)+(0.6,0)$);
+  \draw (A.+) -- ++(-2.2,0) coordinate(r) node[circ]{} node[below right]{$\Vref$};
+  \draw (r) to[zDo, l_=reference] ++(0,-2.6) node[ground]{};
+  \draw (r) to[R, l=$R_V$] ++(0,1.8) node[vcc]{$V_\mathrm{in}$};
+  \draw (A.-) -- ++(0,-0.9) coordinate(N);
+  \draw (N) to[R, l_=$R_2$] (N -| X) -- (X);
+  \draw (N) to[R, l_=$R_1$] ++(0,-1.6) node[ground]{};
+  \draw (A.out) -- (X) to[short,-o] ++(1.2,0) node[right]{$\Vout$};
+  \draw (N) node[circ]{};
+\end{circuitikz}
+\end{center}
+\keyeq{Op-amp voltage source}{$\displaystyle \Vout = \Vref\left(1+\frac{R_2}{R_1}\right)$
+\qquad $\displaystyle R_\mathrm{out} \approx \frac{r_o}{1+A\beta}$, \ $\beta = \frac{R_1}{R_1+R_2}$}
+\bi
+	\ite the reference is not loaded; $\Vout$ is as accurate as $\Vref$ and the ratio $R_2/R_1$
+\ei
+\os{\newpage}
+
+\item[{\rot\bf Output resistance and output current}]~\\[-\lblskip]
+\bi
+	\ite example: $r_o = \SI{50}{\ohm}$, $A = 10^5$, $R_1 = R_2$: $R_\mathrm{out} = \SI{50}{\ohm}/(1+0.5\cdot 10^5) = \SI{1}{\milli\ohm}$
+	\itee \SI{10}{\milli\ampere} more load current changes $\Vout$ by only \SI{10}{\micro\volt}
+	\ite but: the op-amp itself delivers only some \SI{10}{\milli\ampere}
+	\ite and: $\Vout$ must stay inside the output swing of the op-amp
+\ei
+\nsl{The feedback makes the output resistance smaller by the loop gain
+$A\beta$, with the feedback factor $\beta$. This holds at
+low frequencies; at higher frequencies $A$ falls (chapter~\ref{ch:OpAmps})
+and the output resistance rises. A capacitor of some
+\SI{100}{\nano\farad} at the load takes over at high frequencies. A large
+capacitor directly at the op-amp output can make it oscillate; data sheets
+state the allowed capacitive load.}
+\os{\newpage}
+
+\item[{\rot\bf More current: transistor inside the loop}]~\\[-\lblskip]
+\begin{center}
+\begin{circuitikz}[scale=0.9, transform shape]
+  \draw (0,0) node[op amp, noinv input up](A){};
+  \draw (A.+) -- ++(-0.8,0) node[ocirc]{} node[left]{$\Vref$};
+  \draw (A.out) -- ++(0.4,0) node[npn, anchor=B](Q){};
+  \draw (Q.C) -- ++(0,0.6) node[vcc]{$V_\mathrm{in}$};
+  \draw (Q.E) -- ++(0,-0.4) coordinate(E) -- ++(1.6,0) coordinate(O);
+  \draw (E) node[circ]{} to[R, l=$R_2$] ++(0,-1.5) coordinate(N);
+  \draw (N) node[circ]{} to[R, l=$R_1$] ++(0,-1.5) node[ground]{};
+  \draw (N) -| ($(A.-)+(-0.5,0)$) -- (A.-);
+  \draw (O) to[short,-o] ++(0.4,0) node[right]{$\Vout$};
+  \draw (O) to[R, l=$R_L$] ++(0,-3) node[ground]{};
+\end{circuitikz}
+\end{center}
+\bi
+	\ite npn emitter follower as \textbf{booster}: the op-amp delivers only $I_B = I_L/(\beta+1)$
+	\ite $V_{BE}$ lies inside the loop: the op-amp output moves to $\Vout + V_{BE}$, $\Vout$ stays exact
+	\ite transistor power $(V_\mathrm{in}-\Vout)\cdot I_L$; the op-amp output must reach $\Vout+V_{BE}$
+\ei
+\os{\newpage}
+
+\item[{\rot\bf Example: \SI{5.00}{\volt} from \SI{12}{\volt}, up to \SI{100}{\milli\ampere}}]~\\[-\lblskip]
+\bi
+	\ite reference LM4040-2.5 (\SI{2.500}{\volt}, \SI{0.1}{\percent}) with $R_V = \SI{4.7}{\kilo\ohm}$: \SI{2.0}{\milli\ampere}
+	\ite $G = 2$: $R_1 = R_2 = \SI{10}{\kilo\ohm}$ (\SI{0.1}{\percent}) $\Rightarrow$ $\Vout = \SI{5.00}{\volt}$
+	\ite booster BD139 ($\beta \approx 100$): op-amp output \SI{5.7}{\volt} and \SI{1}{\milli\ampere} at \SI{100}{\milli\ampere} load
+\ei
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+ & $R_L = \SI{470}{\ohm}$ & $R_L = \SI{47}{\ohm}$ \\
+\midrule
+emitter follower with Zener (section~\ref{sec:sources-series}) & \SI{4.95}{\volt} & \SI{4.89}{\volt} \\
+op-amp and booster & \SI{5.000}{\volt} & \SI{5.000}{\volt} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\falstad{opamp_voltage_source}\par
+\nsl{In the Falstad example the reference is an ideal \SI{2.5}{\volt}
+source, which stands for the LM4040 with its series resistor. Both cells
+show \texttt{Vout\_10mA} $=$ \texttt{Vout\_100mA} $=\SI{5.000}{\volt}$,
+over the whole range of the $R_L$ slider (\SI{20}{\ohm} to
+\SI{1}{\kilo\ohm}). The transistor dissipates
+$(\SI{12}{\volt}-\SI{5}{\volt})\cdot\SI{106}{\milli\ampere} = \SI{0.74}{\watt}$
+at \SI{47}{\ohm}, the same as in the emitter follower regulator. An
+integrated regulator adds what this circuit lacks: a current limit and a
+thermal shutdown.}
+\os{\newpage}
+\end{description}
+
+\exercise{Op-amp voltage source for \SI{3.3}{\volt}}
+A \SI{3.3}{\volt} supply for a sensor board is built from a \SI{2.5}{\volt} reference, an op-amp
+and an npn booster ($\beta = 100$, $V_{BE} = \SI{0.75}{\volt}$). The input voltage is \SI{12}{\volt},
+the load current up to \SI{200}{\milli\ampere}.
+\begin{talist}
+\ta Choose $R_2$ for $R_1 = \SI{10}{\kilo\ohm}$ from E24 and from E96. Calculate the output voltages.
+\ta Which voltage and current must the op-amp output deliver at full load?
+\ta Calculate the power of the transistor. Compare with the power delivered to the load.
+\ta In the Falstad example, turn the $R_L$ slider from \SI{1}{\kilo\ohm} to \SI{20}{\ohm}. What happens to the output voltage,
+    and what would limit the output current in a real circuit?
+\end{talist}
+
+\begin{solution}
+\begin{talist}
+\ta $R_2 = R_1\,(3.3/2.5-1) = \SI{3.2}{\kilo\ohm}$. E24: \SI{3.3}{\kilo\ohm}, $\Vout = \SI{2.5}{\volt}\cdot 1.33 = \SI{3.325}{\volt}$ (\SI{+0.8}{\percent});
+    E96: \SI{3.24}{\kilo\ohm}, $\Vout = \SI{3.310}{\volt}$ (\SI{+0.3}{\percent}).
+\ta $\Vout + V_{BE} \approx \SI{4.06}{\volt}$; $I_B = \SI{200}{\milli\ampere}/101 = \SI{1.98}{\milli\ampere}$ (the divider takes only \SI{0.25}{\milli\ampere} more from the emitter).
+\ta $P_Q = (\SI{12}{\volt}-\SI{3.31}{\volt})\cdot\SI{0.2}{\ampere} = \SI{1.74}{\watt}$, the load gets only \SI{0.66}{\watt}:
+    efficiency \SI{28}{\percent}. A heat sink is needed; a switching regulator would be the better choice for this current.
+\ta \falstad{opamp_voltage_source}: \texttt{Vout\_100mA} stays at \SI{5.000}{\volt} over the whole slider range
+    (\SI{250}{\milli\ampere} at \SI{20}{\ohm}). The simulation has no current limit; in reality the transistor power
+    (\SI{1.75}{\watt}), its safe operating area and the op-amp output current ($I_L/\beta$) limit the current.
 \end{talist}
 \end{solution}
 
@@ -629,9 +759,9 @@ by a BJT current source at $V_{CC}=\SI{12}{\volt}$ ($V_{BE}=\SI{0.65}{\volt}$, $
 the loop removes the $V_{BE}$ error completely: it forces the voltage
 across the sense resistor to equal a set voltage. Such voltage-to-current
 converters are used for sensor excitation, for \SIrange{4}{20}{\milli\ampere}
-current loops and as programmable current sinks. Op-amps are treated in
-detail in a later chapter; here we only need the rule that an op-amp with
-negative feedback makes the voltage between its inputs zero.\newpage}
+current loops and as programmable current sinks. As for the voltage
+source, we only need the golden rules (chapter~\ref{ch:OpAmpBasics}): an
+op-amp with negative feedback makes the voltage between its inputs zero.\newpage}
 
 \begin{description}
 \item[{\rot\bf Op-amp and transistor}]~\\[-\lblskip]

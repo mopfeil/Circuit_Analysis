@@ -9,18 +9,20 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The Ideal Operational Amplifier}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\nsl{A bridge circuit (chapter~4) turns a small change of a sensor
+\nsl{A bridge circuit (chapter~\ref{ch:Bridges}) turns a small change of a sensor
 resistance into a voltage of a few millivolts. An analog-to-digital
 converter needs volts. In between sits the operational amplifier (op-amp):
 a differential amplifier with a very high gain that is almost never used on
 its own. Together with a few resistors it becomes a buffer, an amplifier
 with an exactly defined gain, a summing or a difference amplifier, an
-instrumentation amplifier or an active filter (chapter~6). The trick
+instrumentation amplifier or an active filter (chapter~\ref{ch:Filters}). The trick
 behind all of these circuits is negative feedback: the resistors, not the
 op-amp, define the behaviour.
 \newline
-In this chapter we first treat the op-amp as an ideal component and derive
-the basic circuits with two simple rules. Then we look at the limits of real
+Chapter~\ref{ch:OpAmpBasics} introduced the ideal op-amp, the golden
+rules, the voltage follower and the non-inverting amplifier. This chapter
+repeats them briefly and derives the other basic circuits with the same
+two rules. Then we look at the limits of real
 op-amps: finite open-loop gain, finite bandwidth, output swing, offset
 voltage and bias currents. At the end we design the measurement amplifier
 of the lab capstone task ``From Sensor to Digital Value''. Good
@@ -85,7 +87,7 @@ supply rails.}
 \bi
 	\ite with $A=10^5$ and \SI{\pm 13.5}{\volt} output swing the linear range is only \SI{\pm 135}{\micro\volt}
 	\ite any larger difference drives the output to a rail: $\Vout$ tells only \emph{which input is higher}
-	\ite this is a \textbf{comparator} -- the building block of the flash ADC (chapter~8)
+	\ite this is a \textbf{comparator} -- the building block of the flash ADC (chapter~\ref{ch:ADC})
 \ei
 \nsl{Without feedback an op-amp is useless as a linear amplifier: a
 difference of a few hundred microvolts is enough to saturate it, and the
@@ -142,9 +144,9 @@ close enough to ideal for these circuits.\newpage}
 \nsl{The follower does not amplify the voltage, it amplifies the current: it
 copies a voltage from a high-impedance node to a low-impedance output.
 This is exactly what a bridge needs. A bridge tap is a voltage divider with
-a source resistance of $R_1\parallelto R_2$ (chapter~1); a following stage
+a source resistance of $R_1\parallelto R_2$ (chapter~\ref{ch:Basics}); a following stage
 with a finite input resistance would load it and shift the measured
-voltage. The same holds for the sample-and-hold circuit (chapter~7): the
+voltage. The same holds for the sample-and-hold circuit (chapter~\ref{ch:SampleHold}): the
 voltage on the hold capacitor must not be discharged by the following
 stage, so it is read by a follower with a very small input current.}
 \os{\newpage}
@@ -622,16 +624,16 @@ voltage source and current source.}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Designing the Measurement Amplifier}\label{sec:opamp-design}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\nsl{Now we design the front end of the capstone task (chapter~9). The
+\nsl{Now we design the front end of the capstone task (chapter~\ref{ch:Capstone}). The
 sensor is a Pt100 (\SI{100}{\ohm} at \SI{0}{\celsius}, \SI{138.5}{\ohm} at
-\SI{100}{\celsius}) in a Wheatstone bridge (chapter~4). The bridge is fed
+\SI{100}{\celsius}) in a Wheatstone bridge (chapter~\ref{ch:Bridges}). The bridge is fed
 from the same \SI{4.00}{\volt} reference that later supplies the ADC ladder,
 with $R_1 = R_3 = \SI{3.9}{\kilo\ohm}$ and $R_4 = \SI{100}{\ohm}$. It is
 balanced at \SI{0}{\celsius} and delivers 0 to \SI{37.18}{\milli\volt} over
 the measurement range. The instrumentation amplifier amplifies this to
 \SI{0}{\volt} at the bottom and exactly \SI{4.00}{\volt} at the top of the
-range. The following low-pass filter (chapter~6), the sample-and-hold
-(chapter~7) and the 3-bit flash ADC (chapter~8) expect exactly this range:
+range. The following low-pass filter (chapter~\ref{ch:Filters}), the sample-and-hold
+(chapter~\ref{ch:SampleHold}) and the 3-bit flash ADC (chapter~\ref{ch:ADC}) expect exactly this range:
 with 8 codes over \SI{4}{\volt} one LSB is \SI{0.5}{\volt}.\newpage}
 
 \begin{description}
@@ -740,7 +742,7 @@ the two adjustments do not influence each other.}
 	\ite two followers, difference amplifier \SI{10}{\kilo\ohm}/\SI{100}{\kilo\ohm}, gain stage $1+(\SI{91}{\kilo\ohm}+R_\mathrm{trim})/\SI{10}{\kilo\ohm}$, $R_\mathrm{trim}=\SI{6.6}{\kilo\ohm}$
 	\ite readings: $V_R = \SI{0.100}{\volt}$, $V_{BR} = \SI{37.18}{\milli\volt}$, $V_\mathrm{diff}=\SI{372}{\milli\volt}$, $\Vout = \SI{4.00}{\volt}$ at \SI{138.5}{\ohm}; $\Vout=\SI{0.00}{\volt}$ at \SI{100}{\ohm}
 	\ite the 50\,Hz interference of \SI{5}{\milli\volt} in series with the Pt100 is a \emph{differential} signal: \SI{4.9}{\milli\volt} at the tap, $\times 107.6$ = \SI{0.52}{\volt} amplitude
-	\itee no CMRR helps here -- the low-pass filter of chapter~6 has to remove it
+	\itee no CMRR helps here -- the low-pass filter of chapter~\ref{ch:Filters} has to remove it
 	\itee the output must have headroom: $\SI{4}{\volt} + \SI{0.52}{\volt}$ peak
 \ei
 \falstad{opamp_ina}\par
@@ -905,7 +907,7 @@ Its output shall be \SI{0}{\volt} at \SI{0}{\celsius} and exactly \SI{4.00}{\vol
 \ta At the tap: $\SI{5}{\milli\volt}\cdot\frac{\SI{3.9}{\kilo\ohm}}{\SI{3.9}{\kilo\ohm}+\SI{100}{\ohm}} = \SI{4.875}{\milli\volt}$,
     at the output $\times 107.6 = \SI{0.52}{\volt}$ amplitude: the output swings up to \SI{4.52}{\volt}.
     The op-amps need headroom (e.g.\ \SI{\pm 15}{\volt} as in Falstad); the low-pass of
-    chapter~6 must attenuate the interference below $\LSB/2 = \SI{0.25}{\volt}$.
+    chapter~\ref{ch:Filters} must attenuate the interference below $\LSB/2 = \SI{0.25}{\volt}$.
 \ta \falstad{opamp_ina}\newline with the Pt100 at \SI{138.5}{\ohm} the labels show \texttt{VB\_minus} $= \SI{0.100}{\volt}$,
     \texttt{V\_diff} $= \SI{372}{\milli\volt}$ and \texttt{Vout} $= \SI{4.00}{\volt}$; with the slider at \SI{100}{\ohm} \texttt{Vout} $= \SI{0.00}{\volt}$.
 \end{talist}

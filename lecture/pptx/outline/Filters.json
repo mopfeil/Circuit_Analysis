@@ -1,0 +1,215 @@
+{
+  "chapter": "Active Filters",
+  "file": "Filters",
+  "number": 7,
+  "subtitle": "Remove interference before sampling: RC, active and Sallen-Key low-passes",
+  "takeaways": [
+    "f_{c} = 1/(2πRC): −3 dB, −20 dB per decade per order",
+    "Op-amp buffers the filter: no loading, optional gain",
+    "Anti-aliasing low-pass with f_{c} ≤ f_{s}/2 before the S&H"
+  ],
+  "slides": [
+    {
+      "type": "points",
+      "section": "Passive RC Filters",
+      "title": "RC low-pass and high-pass",
+      "bullets": [
+        "Low-pass: frequency-dependent divider, C shorts high frequencies",
+        "At f_{c}: |H| = 0.707 (−3 dB), phase −45° (high-pass: +45°)",
+        "Above f_{c}: −20 dB per decade (10× frequency → 1/10 amplitude)",
+        "High-pass blocks DC: coupling capacitor, +20 dB/decade below f_{c}",
+        "dB = 20·log_{10}|H|: cascaded gains add in dB"
+      ],
+      "rule": "f_{c} = 1/(2πRC),   |H| = 1/√(1 + (f/f_{c})^{2})",
+      "figure": "bode-plot-of-the-rc-low-pass-1.png",
+      "falstad": [],
+      "notes": "Show the Bode plot: two straight asymptotes meeting at f_{c}. Derivation of H(jω), the dB table and the high-pass formula are in section Passive RC Filters. Remind them that τ = RC and f_{c} are two views of the same thing."
+    },
+    {
+      "type": "example",
+      "section": "Passive RC Filters",
+      "title": "Falstad: RC low-pass and high-pass",
+      "figure": null,
+      "falstad": [
+        {"name": "filter_rc_lowpass", "hint": "Compare amplitudes at 100 Hz, 1 kHz, 10 kHz (f_{c} = 995 Hz)"},
+        {"name": "filter_rc_highpass", "hint": "Same R, C swapped: watch the phase lead of +45° at 1 kHz"}
+      ],
+      "observe": [
+        "Low-pass: 0.995 V, 0.705 V, 0.099 V at 100 Hz, 1 kHz, 10 kHz",
+        "High-pass mirrors it: 0.100 V, 0.709 V, 0.995 V",
+        "Add a load resistor at the output: f_{c} and amplitude shift"
+      ],
+      "notes": "R = 1.6 kΩ, C = 100 nF. Point out the limits of passive filters: the load changes f_{c}, no gain. This motivates the op-amp in the next section. Exercise 7.1 works the numbers."
+    },
+    {
+      "type": "points",
+      "section": "First-Order Active Filters",
+      "title": "First-order active filters",
+      "bullets": [
+        "Non-inverting: RC low-pass, then follower or amplifier G = 1 + R_{2}/R_{1}",
+        "Op-amp input does not load C; output drives the next stage",
+        "Inverting low-pass: C parallel to R_{2}, f_{c} = 1/(2πR_{2}C), gain −R_{2}/R_{1}",
+        "Inverting high-pass: C_{1} in series with R_{1}, f_{c} = 1/(2πR_{1}C_{1})"
+      ],
+      "rule": "f_{c} is set by the R and C that form the filter",
+      "figure": "non-inverting-first-order-low-pass-1.png",
+      "falstad": [
+        {"name": "filter_active_first_order", "hint": "Three filters, 0.1 V at 1 kHz: compare Vout_a, Vout_b, Vout_c"}
+      ],
+      "notes": "Falstad values: non-inverting LP with G = 2 gives 0.141 V, inverting LP and HP with gain −10 give about 0.705 V. Circuits of the inverting variants are on the next script pages; Exercise 7.2."
+    },
+    {
+      "type": "points",
+      "section": "First-Order Active Filters",
+      "title": "The integrator",
+      "bullets": [
+        "C in the feedback path: V_{out} = −(1/RC)·∫V_{in} dt",
+        "−20 dB per decade at all frequencies, DC gain infinite",
+        "Any offset drives a pure integrator into saturation",
+        "Practical: R_{p} parallel to C limits DC gain to −R_{p}/R"
+      ],
+      "rule": "Square wave in → triangle out, slope V_{in}/(RC)",
+      "figure": "integrator-1.png",
+      "falstad": [
+        {"name": "filter_integrator", "hint": "±1 V square at 500 Hz: triangle of 1 V p-p; watch R_{p} centre it"}
+      ],
+      "notes": "R = 10 kΩ, C = 100 nF: slope 1000 V/s, 1 V per ms. The triangle starts between 0 and −1 V and is centred slowly by R_{p} (τ = 0.1 s). Exercise 7.3."
+    },
+    {
+      "type": "points",
+      "section": "Second-Order Filters",
+      "title": "Sallen-Key low-pass (unity gain)",
+      "bullets": [
+        "Order n: −20·n dB per decade; 2nd order with one op-amp",
+        "C_{1} to the output gives positive feedback near f_{0}",
+        "Q sets the corner: 0.707 Butterworth = maximally flat, −3 dB at f_{0}",
+        "Higher Q: peaking and ringing; |H(f_{0})| = Q"
+      ],
+      "rule": "f_{0} = 1/(2π√(R_{1}R_{2}C_{1}C_{2})),   Q = ½·√(C_{1}/C_{2}) for R_{1} = R_{2}",
+      "figure": "sallen-key-low-pass-unity-gain-1.png",
+      "falstad": [],
+      "notes": "At 20·f_{c} a first-order filter gives −26 dB, second order −52 dB. Transfer function and comparison of coefficients are in section Second-Order Filters. Higher orders: cascade of second-order stages with tabulated f_{0} and Q."
+    },
+    {
+      "type": "recipe",
+      "section": "Second-Order Filters",
+      "title": "Design recipe: Butterworth Sallen-Key",
+      "steps": [
+        "Choose R_{1} = R_{2} = R; Q = 0.707 needs C_{1} = 2·C_{2} (C_{1} to the output)",
+        "Pick C_{2} from E6, C_{1} ≈ 2·C_{2} (e.g. 10 nF and 22 nF: Q = 0.74)",
+        "Calculate R = 1/(2πf_{0}√(C_{1}C_{2})), round to E24 or E96",
+        "Check f_{0} and Q with rounded values; use film or C0G capacitors"
+      ],
+      "figure": "unity-gain-sallen-key-low-pass-1.png",
+      "notes": "Capacitors come in coarser steps, so choose them first. Q between 0.65 and 0.75 changes the response by less than 1 dB. Example 1 kHz: 10 nF, 22 nF, 10.7 kΩ gives f_{0} = 1003 Hz, Q = 0.742."
+    },
+    {
+      "type": "example",
+      "section": "Second-Order Filters",
+      "title": "Falstad: first vs. second order",
+      "figure": null,
+      "falstad": [
+        {"name": "filter_sallen_key", "hint": "At 10 kHz: RC passes 99 mV, Sallen-Key only 10 mV"}
+      ],
+      "observe": [
+        "Near the corner (1 kHz) both are similar: 0.705 V vs. 0.744 V",
+        "One decade above: −20 dB vs. −40 dB",
+        "Change C_{1} to raise Q and watch the peaking"
+      ],
+      "notes": "Input 1 V amplitude; RC with f_{c} = 995 Hz, Sallen-Key with f_{0} = 1003 Hz, Q = 0.742. Exercise 7.4."
+    },
+    {
+      "type": "points",
+      "section": "The Anti-Aliasing Filter of the Capstone",
+      "title": "Why filter before sampling?",
+      "bullets": [
+        "Only frequencies below f_{s}/2 are reproduced correctly",
+        "Capstone: f_{s} = 5 Hz → f_{c} ≤ 2.5 Hz (2.34 Hz chosen)",
+        "Above f_{s}/2 a component reappears at a wrong low frequency (aliasing)",
+        "50 Hz hum: 4.9 mV at the bridge × 107.6 = 0.52 V at the INA output",
+        "After sampling nothing separates alias from signal: filter first"
+      ],
+      "rule": "f_{c} ≤ f_{s}/2, filter before the S&H",
+      "figure": null,
+      "falstad": [],
+      "notes": "Preview of the ADC chapter. 50 Hz = 10·f_{s}: the samples see the hum at a fixed phase; if mains drifts to 50.1 Hz the error becomes a slow 0.1 Hz wave in the data."
+    },
+    {
+      "type": "compare",
+      "section": "The Anti-Aliasing Filter of the Capstone",
+      "title": "Capstone filter: 1st vs. 2nd order",
+      "left": {
+        "head": "1st order + follower",
+        "bullets": [
+          "6.8 kΩ, 10 µF: f_{c} = 2.34 Hz",
+          "−26.6 dB at 50 Hz: 25 mV ≈ 0.05 LSB",
+          "Sufficient for the 3-bit ADC"
+        ]
+      },
+      "right": {
+        "head": "Sallen-Key",
+        "bullets": [
+          "91 kΩ, 91 kΩ, 1 µF, 470 nF: f_{0} = 2.55 Hz",
+          "−52 dB at 50 Hz: 1.4 mV ≈ 0.003 LSB",
+          "Margin for a higher-resolution ADC"
+        ]
+      },
+      "figure": ["first-order-anti-aliasing-filter-with-e--1.png", "second-order-version-sallen-key-1.png"],
+      "notes": "1 LSB = 0.5 V, so 25 mV is far below LSB/2. With 10 bits (LSB 3.9 mV) the first-order filter would leave about 6 LSB, the Sallen-Key less than half an LSB. Step response of the first-order filter: τ = 68 ms, 1 % after 0.31 s. Exercise 7.5."
+    },
+    {
+      "type": "example",
+      "section": "The Anti-Aliasing Filter of the Capstone",
+      "title": "Falstad: anti-aliasing filters",
+      "figure": null,
+      "falstad": [
+        {"name": "filter_antialias", "hint": "2 V DC + 0.52 V at 50 Hz: compare the 50 Hz residue of both"}
+      ],
+      "observe": [
+        "Both outputs settle to 2.00 V in about 0.3 s",
+        "Residual 50 Hz: 25 mV (1st order), 1.4 mV (Sallen-Key)",
+        "Settling time stays short against the 200 ms sample period"
+      ],
+      "notes": "Let the simulation run for about 0.6 s before reading the values. The input reproduces the capstone situation: 4.875 mV × 107.6 = 0.52 V of hum on the 2 V signal."
+    },
+    {
+      "type": "points",
+      "section": "The Anti-Aliasing Filter of the Capstone",
+      "title": "Twin-T notch at 50 Hz",
+      "bullets": [
+        "Zero transmission at f_{0} = 1/(2πRC): 31.8 kΩ, 100 nF → 50 Hz",
+        "Removes 50 Hz almost completely (1 V → 0.45 mV)",
+        "Also attenuates 5 Hz (0.927), needs precise parts",
+        "Removes one frequency only: no replacement for the low-pass"
+      ],
+      "rule": null,
+      "figure": null,
+      "falstad": [
+        {"name": "filter_twin_t", "hint": "Compare Vout_5Hz and Vout_50Hz; detune one C and watch 50 Hz return"}
+      ],
+      "notes": "The twin-T needs a follower at its output. Exercise 7.6."
+    },
+    {
+      "type": "recipe",
+      "section": "The Anti-Aliasing Filter of the Capstone",
+      "title": "Design recipe: anti-aliasing low-pass",
+      "steps": [
+        "Cutoff from the sample rate: f_{c} ≤ f_{s}/2 (capstone: 2.34 Hz at f_{s} = 5 Hz)",
+        "Attenuation: interference at the ADC must stay below LSB/2",
+        "1st order: choose C, R = 1/(2πf_{c}C), round so f_{c} ≤ f_{s}/2, buffer it",
+        "2nd order: unity-gain Sallen-Key with C_{1} ≈ 2·C_{2}",
+        "Check settling (≈ 5τ) and headroom: signal + hum must not clip"
+      ],
+      "figure": null,
+      "notes": "This is the design card at the end of the section. Capstone: 0.52 V × 0.047 = 25 mV, well below 250 mV."
+    }
+  ],
+  "exercises": [
+    "Exercise 7.1: RC low-pass",
+    "Exercise 7.2: First-order active filters",
+    "Exercise 7.3: Integrator",
+    "Exercise 7.4: Sallen-Key low-pass",
+    "Exercise 7.5: Capstone: anti-aliasing low-pass",
+    "Exercise 7.6: Twin-T notch"
+  ]
+}

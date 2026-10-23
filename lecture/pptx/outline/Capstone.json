@@ -1,0 +1,171 @@
+{
+ "chapter": "From Sensor to Digital Value",
+ "file": "Capstone",
+ "number": 10,
+ "subtitle": "The whole course in one chain: Pt100 thermometer to 3-bit code on LEDs",
+ "takeaways": [
+  "One 4 V reference for bridge and ladder: ratiometric",
+  "Anti-aliasing filter removes 50 Hz before sampling",
+  "Verify in Falstad at bin centres, not at thresholds"
+ ],
+ "slides": [
+  {
+   "type": "points",
+   "section": "The Measurement Chain",
+   "title": "Five stages from sensor to code",
+   "bullets": [
+    "0 … 100 °C → 0 … 4.00 V → code 000 … 111",
+    "LSB = 4 V/2^{3} = 0.5 V → 12.5 °C",
+    "Interference: 5 mV at 50 Hz in series with the sensor",
+    "Every stage is a circuit from an earlier chapter"
+   ],
+   "rule": null,
+   "figure": "five-stages-from-sensor-to-code-1.png",
+   "falstad": [],
+   "notes": "Bridge from chapter Bridge Circuits, INA from Operational Amplifiers, low-pass from Active Filters, S&H from Sample and Hold, flash ADC from the previous chapter, LED resistor from Basics. This chapter is the worked solution of Exercise 10.1."
+  },
+  {
+   "type": "points",
+   "section": "The Measurement Chain",
+   "title": "Design values at a glance",
+   "bullets": [
+    "Pt100, 100 … 138.5 Ω, sensor current ≈ 1 mA",
+    "Gain 107.6 = 10 × 10.76 (each stage < 100)",
+    "Anti-aliasing 6.8 kΩ, 10 µF: f_{c} = 2.34 Hz",
+    "S&H: f_{s} = 5 Hz, 20 ms window, C_{H} = 1 µF",
+    "Flash: 8 × 1 kΩ, 7 comparators; display 10 × (LED + 330 Ω)"
+   ],
+   "rule": null,
+   "figure": null,
+   "falstad": [],
+   "notes": "These numbers run through the whole course; keep them on screen as the reference for the next slides. The full specification table is in section The Measurement Chain."
+  },
+  {
+   "type": "points",
+   "section": "Stage 1: Signal Conditioning",
+   "title": "Stage 1: bridge, INA and gain",
+   "bullets": [
+    "Bridge fed from the 4.00 V reference, balanced at 0 °C (R_{4} = 100 Ω)",
+    "Bridge output 0 … 37.18 mV; buffers keep the bridge unloaded",
+    "Difference amp G_{1} = 10, gain stage G_{2} = 1 + 97.6 k/10 k = 10.76",
+    "Keep G < 100 per stage: gain error ≈ G/A",
+    "Zero set by R_{4}, span by R_{F}: trims do not interact"
+   ],
+   "rule": "V_{COND} = G_{1}·G_{2}·V_{BR},  G_{1}·G_{2} = 107.6",
+   "figure": "instrumentation-amplifier-and-gain-stage-1.png",
+   "falstad": [],
+   "notes": "Ratiometric: if the reference is 1 % high, bridge output and ADC thresholds are both 1 % high, the code does not change (Exercise 10.2). Trim: set 100 Ω and check 0 V, then 138.5 Ω and adjust R_F for 4.00 V."
+  },
+  {
+   "type": "points",
+   "section": "Stage 2: Anti-Aliasing",
+   "title": "Stage 2: anti-aliasing low-pass",
+   "bullets": [
+    "50 Hz sampled at 5 Hz → alias at 0 Hz: a constant, invisible offset",
+    "Hum after gain 107.6 ≈ 0.52 V, about one full LSB",
+    "RC 6.8 kΩ, 10 µF: f_{c} = 2.34 Hz ≤ f_{s}/2, −26.6 dB at 50 Hz",
+    "Residual 25 mV < ½ LSB = 250 mV; follower decouples the RC"
+   ],
+   "rule": "Residual = V_{peak}/√(1 + (f/f_{c})^{2}) < ½ LSB",
+   "figure": "anti-aliasing-low-pass-1.png",
+   "falstad": [],
+   "notes": "For 3 bits a first-order filter is enough. For 10 bit the residual would be twelve times too large: then use 2nd or 3rd order, oversampling, or a sampling rate that is not a sub-multiple of 50 Hz (Exercise 10.3)."
+  },
+  {
+   "type": "compare",
+   "section": "Stage 3: Sample and Hold",
+   "title": "Stage 3: choosing the hold capacitor",
+   "left": {
+    "head": "Upper limit: charging",
+    "bullets": [
+     "τ = R_{on}·C_{H} = 20 Ω · 1 µF = 20 µs",
+     "Settle to ½ LSB in 2.8·τ ≪ 20 ms window",
+     "Too large C_{H}: staircase lags the input"
+    ]
+   },
+   "right": {
+    "head": "Lower limit: droop",
+    "bullets": [
+     "ΔV = I_{L}·t_{hold}/C_{H} = 0.18 mV",
+     "1 nA leakage over 180 ms hold time",
+     "Too small C_{H}: held value drifts"
+    ]
+   },
+   "figure": null,
+   "notes": "Clock 5 Hz with 10 % duty: 20 ms track, 180 ms hold. Both limits leave a wide range, 10 nF to 100 µF; choose a 1 µF film capacitor. Exercise 10.5 redoes this with R_on = 1 kΩ and 10 nA."
+  },
+  {
+   "type": "points",
+   "section": "Stages 4 and 5: Flash ADC, Encoder and Display",
+   "title": "Stages 4 and 5: flash ADC and display",
+   "bullets": [
+    "Ladder 8 × 1 kΩ from 4.00 V: thresholds 0.5 … 3.5 V, 0.5 mA",
+    "C_{k} = 1 if V_{HOLD} > k·0.5 V: thermometer code, level 0 … 7",
+    "B_{2} = C_{4},  B_{1} = C_{2}·¬C_{4} + C_{6},  B_{0}: odd levels",
+    "7 red LEDs as bar graph, 3 green LEDs for the binary code",
+    "330 Ω per LED from 5 V logic: about 9.8 mA in Falstad"
+   ],
+   "rule": null,
+   "figure": null,
+   "falstad": [],
+   "notes": "Same converter as in the ADC chapter, Falstad example flash3. The full encoder equation for B0 is in section Stages 4 and 5. Exercise 10.4 extends it to four bits."
+  },
+  {
+   "type": "example",
+   "section": "The Complete Chain in Falstad",
+   "title": "Falstad: the complete chain",
+   "figure": null,
+   "falstad": [
+    {
+     "name": "capstone",
+     "hint": "Move Sensor R 100 → 138.5 Ω: bar fills, binary LEDs count"
+    }
+   ],
+   "observe": [
+    "Hover over VCOND, VAA, VHOLD: the held value updates every 200 ms",
+    "After a slider step wait ≈ 0.5 s: the low-pass needs 5τ = 340 ms",
+    "Bin-centre test points: e.g. 116.75 Ω → 1.75 V → code 011"
+   ],
+   "notes": "Verification table in section The Complete Chain in Falstad: 6.2, 18.6, 43.5, 56.0, 81.1, 93.7 °C give codes 000, 001, 011, 100, 110, 111, with V_HOLD within 1 mV of the target."
+  },
+  {
+   "type": "example",
+   "section": "The Complete Chain in Falstad",
+   "title": "Falstad: the aliasing experiment",
+   "figure": null,
+   "falstad": [
+    {
+     "name": "capstone_nofilter",
+     "hint": "Sensor R = 116.75 Ω (V_{COND} = 1.75 V): code 100, not 011"
+    }
+   ],
+   "observe": [
+    "S&H samples V_{COND} directly; 0.52 V of 50 Hz is always hit at the same phase",
+    "Held value is a clean staircase, just 0.52 V too high: one code too high",
+    "With the filter (capstone) the same input gives the correct code 011"
+   ],
+   "notes": "This is the worst-case phase; the offset size depends on the phase between mains and sampling clock. The point: nothing on the scope looks wrong, only the code is."
+  },
+  {
+   "type": "recipe",
+   "section": "Exercises",
+   "title": "Design recipe: sensor to digital value",
+   "steps": [
+    "Fix range and resolution: full scale, N bits, LSB = V_{FS}/2^{N}",
+    "Share one reference between sensor excitation and ladder (ratiometric)",
+    "Set total gain = V_{FS}/bridge span; split into stages with G < 100",
+    "Choose f_{s}, then an anti-aliasing filter keeping hum < ½ LSB",
+    "Size C_{H} between droop and charging limits; verify at bin centres"
+   ],
+   "figure": null,
+   "notes": "This is the procedure behind the capstone task, Exercise 10.1. Students should do the paper design first and then check every stage against the Falstad model."
+  }
+ ],
+ "exercises": [
+  "Exercise 10.1: From sensor to digital value (capstone task 2025/26)",
+  "Exercise 10.2: Ratiometric measurement",
+  "Exercise 10.3: Another sampling rate",
+  "Exercise 10.4: Four bits",
+  "Exercise 10.5: Hold capacitor at the limits"
+ ]
+}

@@ -11,10 +11,10 @@
 design a simple digital thermometer: a resistive temperature sensor
 measures \SIrange{0}{100}{\celsius}, and the result is shown as a 3-bit
 code on LEDs. Every stage of the chain is a circuit from an earlier
-chapter: the bridge from chapter~4, the instrumentation amplifier from
-chapter~5, the low-pass from chapter~6, the sample and hold from
-chapter~7 and the flash converter from chapter~8. The LED with its series
-resistor even goes back to chapter~1.
+chapter: the bridge from chapter~\ref{ch:Bridges}, the instrumentation amplifier from
+chapter~\ref{ch:OpAmps}, the low-pass from chapter~\ref{ch:Filters}, the sample and hold from
+chapter~\ref{ch:SampleHold} and the flash converter from chapter~\ref{ch:ADC}. The LED with its series
+resistor even goes back to chapter~\ref{ch:Basics}.
 \newline
 The design is done twice: on paper, with all calculations, and in
 Falstad, where the complete chain runs and can be checked against the
@@ -216,7 +216,7 @@ a volt, one full LSB.\newpage}
 \ei
 \nsl{For 3 bits a first-order filter is sufficient. For a 10-bit converter
 ($\LSB/2 = \SI{2}{\milli\volt}$) the residual \SI{25}{\milli\volt} would be
-twelve times too large; a second- or third-order filter (chapter~6), a higher
+twelve times too large; a second- or third-order filter (chapter~\ref{ch:Filters}), a higher
 sampling rate followed by digital averaging, or a sampling rate that is
 \emph{not} a sub-multiple of \SI{50}{\hertz} would then be needed.}
 \designcard{Nyquist \& anti-aliasing (capstone values)}{%
@@ -233,7 +233,7 @@ $f_c = 1/(2\pi RC) \leq f_s/2$; \quad residual $= \hat v\,/\sqrt{1+(f/f_c)^2}$ m
 hold. We use one anyway, because it defines the sampling instant: the
 input of the converter changes only once per sampling period, so the LEDs
 show a stable code, and the aliasing experiment becomes visible. The
-circuit is the buffered S\&H of chapter~7.\newpage}
+circuit is the buffered S\&H of chapter~\ref{ch:SampleHold}.\newpage}
 
 \begin{description}
 \item[{\rot\bf Buffered sample and hold}]~\\[-\lblskip]
@@ -266,7 +266,7 @@ circuit is the buffered S\&H of chapter~7.\newpage}
 	\itee choose a film capacitor with low leakage and dielectric absorption: $C_H = \SI{1}{\micro\farad}$
 \ei
 \nsl{In hardware a small resistor (e.g.\ \SI{1}{\kilo\ohm}, as in the
-examples of chapter~7) is usually put in series with the switch: it limits
+examples of chapter~\ref{ch:SampleHold}) is usually put in series with the switch: it limits
 the charging current that the input buffer must deliver and isolates the
 buffer from the capacitive load. Then $\tau = \SI{1.02}{\milli\second}$
 and settling to $\LSB/2$ takes \SI{2.8}{\milli\second}, still well inside
@@ -343,7 +343,7 @@ $V_\mathrm{HOLD}$ / V & level & $C_7$ & $C_6$ & $C_5$ & $C_4$ & $C_3$ & $C_2$ & 
 \bi
 	\ite 7 red LEDs from $C_1\ldots C_7$: bar graph, a thermometer you can read without decoding
 	\ite 3 green LEDs from $B_2B_1B_0$: the binary result
-	\ite each LED with its own series resistor (chapter~1), driven by a \SI{5}{\volt} logic output:
+	\ite each LED with its own series resistor (chapter~\ref{ch:Basics}), driven by a \SI{5}{\volt} logic output:
 	$R = \frac{\SI{5}{\volt}-V_F}{I_F} = \frac{\SI{5}{\volt}-\SI{1.8}{\volt}}{\SI{10}{\milli\ampere}} = \SI{320}{\ohm}$ $\rightarrow$ E12: \SI{330}{\ohm}
 	\itee Falstad: $I_F = \SI{9.8}{\milli\ampere}$, $V_F = \SI{1.78}{\volt}$
 	\ite never one common resistor for several LEDs: the current would depend on how many are on

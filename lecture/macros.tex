@@ -21,7 +21,7 @@
 \newcommand{\falstaddef}[3]{%
   \expandafter\edef\csname falstad@url@#1\endcsname{\detokenize{#3}}%
   \expandafter\def\csname falstad@dir@#1\endcsname{#2}}
-\@for\falstad@ch:={basics,sources,references,bridges,opamps,filters,samplehold,adc,capstone}\do{%
+\@for\falstad@ch:={basics,opampbasics,sources,references,bridges,opamps,filters,samplehold,adc,capstone}\do{%
   \IfFileExists{links/\falstad@ch.tex}{\input{links/\falstad@ch.tex}}{}}
 % \falstad{name}: clickable reference, opens the circuit in the browser
 \newcommand{\falstad}[1]{%

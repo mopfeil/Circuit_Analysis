@@ -1,0 +1,237 @@
+{
+ "chapter": "Analog-to-Digital Conversion",
+ "file": "ADC",
+ "number": 9,
+ "subtitle": "Sample, quantize, compare, encode: from voltage to code, the 3-bit flash way",
+ "takeaways": [
+  "Filter everything above f_{s}/2 before the S&H",
+  "LSB = V_{FS}/2^{N}; each bit adds 6 dB of SNR",
+  "Flash = ladder + 2^{N}−1 comparators + encoder"
+ ],
+ "slides": [
+  {
+   "type": "points",
+   "section": "Sampling and Aliasing",
+   "title": "Sampling theorem and aliasing",
+   "bullets": [
+    "All input components must lie below the Nyquist frequency f_{s}/2",
+    "Applies to noise and interference too, not only to the wanted signal",
+    "Too-high frequencies fold back into 0 … f_{s}/2 and look like real signals",
+    "Capstone f_{s} = 5 Hz: 4 Hz → 1 Hz, 49 Hz → 1 Hz, 50 Hz → 0 Hz (DC!)"
+   ],
+   "rule": "f_{alias} = |f − k·f_{s}|, k chosen so that f_{alias} ≤ f_{s}/2",
+   "figure": "folding-1.png",
+   "falstad": [],
+   "notes": "Show the folding plot: every input frequency lands somewhere in the pass band. After sampling no processing can tell an alias from a real component. The 4 Hz / 1 Hz sample picture is in section Sampling and Aliasing."
+  },
+  {
+   "type": "example",
+   "section": "Sampling and Aliasing",
+   "title": "Falstad: sampling 50 Hz hum",
+   "figure": "aliasing-1.png",
+   "falstad": [
+    {
+     "name": "alias50",
+     "hint": "Compare the 5 Hz and 4.9 Hz S&H outputs; change the 50 Hz phase"
+    }
+   ],
+   "observe": [
+    "f_{s} = 5 Hz: every sample is 2.14 V instead of 2 V, a constant hidden offset",
+    "f_{s} = 4.9 Hz: the samples beat slowly at 1 Hz, the error becomes visible",
+    "Change the hum phase: the offset at 5 Hz moves between 1.5 V and 2.5 V"
+   ],
+   "notes": "Input is 2 V DC plus 0.5 V of 50 Hz hum. Point out that nothing on the display looks wrong at 5 Hz: the error is invisible. Calculation of the 2.14 V is in Exercise 9.1."
+  },
+  {
+   "type": "recipe",
+   "section": "Sampling and Aliasing",
+   "title": "Design recipe: anti-aliasing filter",
+   "steps": [
+    "Choose f_{s} from the signal bandwidth; Nyquist frequency is f_{s}/2",
+    "Place a low-pass before the S&H with f_{c} ≈ f_{s}/2 (capstone 2.34 Hz)",
+    "Require: interference amplitude × |H(f)| < ½ LSB (better ¼ LSB)",
+    "1st order gives f_{c}/f (−20 dB/dec), 2nd order (f_{c}/f)^{2} (−40 dB/dec)",
+    "Not enough? Raise the order or oversample to widen the gap to f_{s}/2"
+   ],
+   "figure": "anti-aliasing-filter-1.png",
+   "notes": "At 50 Hz the 1st-order filter gives −26.6 dB (factor 21), 2nd-order Butterworth −53 dB. The filter must sit before the S&H: after sampling the damage is done."
+  },
+  {
+   "type": "points",
+   "section": "Quantization",
+   "title": "Resolution, LSB and quantization error",
+   "bullets": [
+    "Code D = floor(V_{in}/LSB), limited to 0 … 2^{N}−1",
+    "Capstone: 3 bit, 4 V full scale → LSB = 0.5 V, codes 000 … 111",
+    "Error 0 … 1 LSB with thresholds at k·LSB; ±½ LSB if shifted by ½ LSB",
+    "Test at the bin centres 0.25 V, 0.75 V, … 3.75 V, never at a threshold",
+    "Ideal SNR = 6.02·N + 1.76 dB: every extra bit gives 6 dB"
+   ],
+   "rule": "LSB = V_{FS}/2^{N}",
+   "figure": "transfer-characteristic-1.png",
+   "falstad": [],
+   "notes": "Typical values: 10 bit at 3.3 V gives 3.2 mV, 16 bit at 5 V gives 76 µV. The SNR derivation (LSB/√12 noise) is in section Quantization."
+  },
+  {
+   "type": "example",
+   "section": "Quantization",
+   "title": "Falstad: quantization made visible",
+   "figure": "quantization-error-1.png",
+   "falstad": [
+    {
+     "name": "quant_error",
+     "hint": "Watch V_{in} and the DAC staircase V_{q} on the scope"
+    }
+   ],
+   "observe": [
+    "3-bit flash ADC followed by an R-2R DAC turns the code back into D·0.5 V",
+    "The gap V_{in} − V_{q} always stays between 0 V and 0.5 V (sawtooth)",
+    "Read examples: 1.8 V → 1.5 V, 3.98 V → 3.5 V"
+   ],
+   "notes": "Input is a 0–4 V triangle at 0.25 Hz. The sawtooth figure is the error the scope shows. Exercise 9.2 uses this circuit."
+  },
+  {
+   "type": "points",
+   "section": "The Comparator",
+   "title": "Comparator and hysteresis",
+   "bullets": [
+    "Comparator = 1-bit ADC: output high if V_{+} > V_{−}",
+    "Op-amp open loop works but is slow; comparator ICs are fast (LM393, open collector)",
+    "Offset voltage must be ≪ LSB; never use a comparator IC as an op-amp",
+    "Slow noisy input → chatter; Schmitt trigger: hysteresis > noise (p-p)",
+    "Behind an S&H (flash ADC): no hysteresis, it would shift the thresholds"
+   ],
+   "rule": "V_{T+} = V_{ref}(1 + R_{1}/R_{2}),  V_{T−} = V_{T+} − V_{OH}·R_{1}/R_{2}",
+   "figure": "open-loop-op-amp-as-comparator-1.png",
+   "falstad": [
+    {
+     "name": "comparator_hyst",
+     "hint": "Count output edges: plain comparator vs Schmitt trigger"
+    }
+   ],
+   "notes": "Falstad comparator: op-amp with max output 5 V and min output 0 V. With R1 = 10 kΩ, R2 = 100 kΩ, Vref = 2 V the thresholds are 2.2 V and 1.7 V. In the sim the plain comparator gives 10 edges per period, the Schmitt trigger exactly 2."
+  },
+  {
+   "type": "points",
+   "section": "The Flash Converter",
+   "title": "The flash converter",
+   "bullets": [
+    "Resistor ladder of 2^{N} equal resistors sets the thresholds k·LSB",
+    "One comparator per threshold: C_{k} = 1 if V_{in} > k·LSB",
+    "Output is a thermometer code: the number of ones is the code D",
+    "Fastest architecture, but 2^{N}−1 comparators: 7 for 3 bit, 255 for 8 bit",
+    "Capstone: 8 × 1 kΩ from 4 V, taps 0.5 … 3.5 V, ladder current 0.5 mA"
+   ],
+   "rule": null,
+   "figure": "2-bit-flash-converter-1.png",
+   "falstad": [
+    {
+     "name": "flash2",
+     "hint": "Sweep V_{in}: comparators switch at 1 V, 2 V, 3 V"
+    }
+   ],
+   "notes": "Start with the 2-bit version: three comparators, LSB 1 V. The ladder current must be much larger than the comparator input currents; the reference must be stiff."
+  },
+  {
+   "type": "points",
+   "section": "The Flash Converter",
+   "title": "Thermometer-to-binary encoder",
+   "bullets": [
+    "B_{2} = C_{4}",
+    "B_{1} = C_{2}·¬C_{4} + C_{6}",
+    "B_{0} = C_{1}·¬C_{2} + C_{3}·¬C_{4} + C_{5}·¬C_{6} + C_{7}",
+    "Gates: 3 NOT, 4 AND2, 1 OR2, 1 OR4",
+    "Bubbles (offset, noise) give wrong codes; priority encoder 74HC148 is robust"
+   ],
+   "rule": "Top of the column H_{k} = C_{k}·¬C_{k+1}; B_{i} = OR of H_{k} with bit i set",
+   "figure": "encoder-logic-1.png",
+   "falstad": [],
+   "notes": "The derivation from the one-hot code is in section The Flash Converter, Deriving the encoder. In the capstone the input is held and the LSB is large, so bubbles do not occur. Exercise 9.4 shows a bubble causing a 2-LSB error."
+  },
+  {
+   "type": "example",
+   "section": "The Flash Converter",
+   "title": "Falstad: 3-bit flash ADC with display",
+   "figure": null,
+   "falstad": [
+    {
+     "name": "flash3",
+     "hint": "Set V_{in} to bin centres 0.25 … 3.75 V, read codes 000 … 111"
+    }
+   ],
+   "observe": [
+    "Labeled nodes C1 … C7, B0 … B2: hover to read the voltages",
+    "7 LEDs form a bar graph, 3 LEDs show B_{2}B_{1}B_{0}",
+    "Default 2.6 V: five bar LEDs on, binary 101"
+   ],
+   "notes": "Labeled nodes with the same name are connected, which keeps the drawing readable. This is the converter of the capstone. Design is Exercise 9.3."
+  },
+  {
+   "type": "points",
+   "section": "Displaying the Result",
+   "title": "LED display and current budget",
+   "bullets": [
+    "One series resistor per LED, never one common resistor",
+    "Red LED: V_{F} ≈ 1.8 … 2 V, bright enough at 5 … 10 mA",
+    "Capstone: 330 Ω from 5 V logic → about 9 mA per LED",
+    "Code 7: 10 LEDs on ≈ 91 mA; check the driver's V_{OH} at load",
+    "Heavy loads: buffer gates, low-current LEDs or a driver IC"
+   ],
+   "rule": "R = (V_{OH} − V_{F})/I_{F}",
+   "figure": "led-with-series-resistor-1.png",
+   "falstad": [],
+   "notes": "In our circuit C4 drives its bar LED, the B2 LED and gate inputs: 18 mA. 74HC outputs are limited to 25 mA absolute maximum and V_OH drops under load. Falstad outputs are ideal and do not show this. Exercise 9.5."
+  },
+  {
+   "type": "points",
+   "section": "Other Converter Architectures",
+   "title": "R-2R DAC and successive approximation",
+   "bullets": [
+    "R-2R ladder: only two resistor values for any number of bits",
+    "V_{out} = V_{ref}·D/2^{N}; output resistance is always R",
+    "SAR: binary search with one comparator and a DAC, MSB first",
+    "N clock cycles for N bits; 8 … 18 bit, typical in microcontrollers"
+   ],
+   "rule": "V_{out} = V_{ref}·(B_{2}/2 + B_{1}/4 + B_{0}/8)",
+   "figure": "r-2r-ladder-dac-1.png",
+   "falstad": [
+    {
+     "name": "r2r_dac",
+     "hint": "Counter drives the bits: staircase in 0.625 V steps"
+    }
+   ],
+   "notes": "The SAR worked example (4 bit, 2.6 V → 1010) is in section Other Converter Architectures. Most converters contain a DAC in a feedback loop, which is why we start with R-2R. Exercise 9.6."
+  },
+  {
+   "type": "compare",
+   "section": "Other Converter Architectures",
+   "title": "Choosing a converter architecture",
+   "left": {
+    "head": "Fast",
+    "bullets": [
+     "Flash: 4 … 8 bit, up to GS/s, oscilloscopes",
+     "SAR: 8 … 18 bit, kS/s … MS/s, microcontrollers",
+     "Need an anti-aliasing filter in front"
+    ]
+   },
+   "right": {
+    "head": "Precise",
+    "bullets": [
+     "Dual-slope: 12 … 22 bit, 1 … 100 S/s, multimeters",
+     "Sigma-delta: 16 … 24 bit, audio, scales",
+     "Built-in 50 Hz or digital filtering"
+    ]
+   },
+   "figure": null,
+   "notes": "Dual-slope integrates over 20 ms, so 50 Hz hum integrates to zero; the capstone instead removes it with the anti-aliasing filter. The capstone uses a flash converter because every part is visible: ladder, comparators, logic."
+  }
+ ],
+ "exercises": [
+  "Exercise 9.1: Aliasing",
+  "Exercise 9.2: Quantization",
+  "Exercise 9.3: Designing the 3-bit flash converter",
+  "Exercise 9.4: Bubble error",
+  "Exercise 9.5: LED display",
+  "Exercise 9.6: Schmitt trigger, R-2R DAC and SAR"
+ ]
+}

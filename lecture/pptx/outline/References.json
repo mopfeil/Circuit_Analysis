@@ -1,0 +1,223 @@
+{
+  "chapter": "Voltage References",
+  "file": "References",
+  "number": 4,
+  "subtitle": "Zener and bandgap references, scaling to 4.00 V, ratiometric measurement",
+  "takeaways": [
+    "A reference error is a gain error of the chain",
+    "Never load a reference: buffer and scale it",
+    "Ratiometric measurement cancels the reference"
+  ],
+  "slides": [
+    {
+      "type": "compare",
+      "section": "Why Voltage References?",
+      "title": "Regulator or reference?",
+      "left": {
+        "head": "Voltage regulator",
+        "bullets": [
+          "Supplies power: mA … A",
+          "Accuracy 1–5 %, 100–300 ppm/K",
+          "Noise high, rarely specified"
+        ]
+      },
+      "right": {
+        "head": "Voltage reference",
+        "bullets": [
+          "Defines a voltage: µA … 10 mA",
+          "Accuracy 0.02–1 %, 1–50 ppm/K",
+          "Low, specified noise"
+        ]
+      },
+      "figure": null,
+      "notes": "The ADC measures a ratio, code = 2^N·V_in/V_ref, and the bridge output is a fraction of its excitation: any error of V_ref is a gain error of the whole chain. A reference is a voltage standard on the board; if a load needs current, buffer it with an op-amp."
+    },
+    {
+      "type": "points",
+      "section": "Specifications",
+      "title": "Data sheet parameters",
+      "bullets": [
+        "Initial accuracy at 25 °C (e.g. ±0.1 %) and TC (e.g. 20 ppm/K)",
+        "Line and load regulation (e.g. 50 µV/V, 100 ppm/mA)",
+        "Noise 0.1–10 Hz peak-to-peak, long-term drift, thermal hysteresis"
+      ],
+      "rule": "Box method: TC = (V_{max} − V_{min})/(V_{nom}·(T_{max} − T_{min}))·10^{6} ppm",
+      "figure": "temperature-coefficient-the-box-method-1.png",
+      "falstad": [],
+      "notes": "The box method only uses the extremes, not the shape of the curve: a bandgap's bow looks better or worse depending on the temperature range. Calibration removes the initial accuracy, but not drift and hysteresis."
+    },
+    {
+      "type": "points",
+      "section": "The Zener Reference",
+      "title": "The Zener reference",
+      "bullets": [
+        "Smallest |TC| near 5–6 V: use 5.6 V or 6.2 V Zeners",
+        "6.2 V Zener + forward diode: compensated reference diode (1N821)",
+        "Fed by a resistor: line regulation ≈ r_{Z}/(R_{V} + r_{Z}), r_{Z} = 5–50 Ω",
+        "Fed by a current source: ≈ r_{Z}/r_{o}, far better"
+      ],
+      "rule": null,
+      "figure": "temperature-coefficient-of-zener-diodes-1.png",
+      "falstad": [],
+      "notes": "Below 5 V the Zener effect has a negative TC, above it the avalanche effect a positive one. The feed choice decides how much supply variation reaches the reference; both feeds are compared in Falstad on the next slide."
+    },
+    {
+      "type": "example",
+      "section": "The Zener Reference",
+      "title": "Falstad: resistor vs current-source feed",
+      "figure": "feeding-a-zener-from-a-current-source-1.png",
+      "falstad": [
+        {"name": "zener_resistor", "hint": "Supply 12 → 14 V: +7 mV; add 2.2 kΩ load: −17 mV"},
+        {"name": "zener_current_source", "hint": "Move the slider to 14 V: VzI changes by only 0.1 mV"}
+      ],
+      "observe": [
+        "Series resistor 1.2 kΩ: 3.5 mV/V line regulation",
+        "Current source with r_{o} = 100 kΩ: 70 times better",
+        "The load current is taken from the Zener: keep I_{Z} ≥ I_{Z,min}"
+      ],
+      "notes": "Read the labels Vz12, Vz14, Vz12L and VzR/VzI. Calculations with the exponential Zener model are in Exercise 4.1 and Exercise 4.2."
+    },
+    {
+      "type": "points",
+      "section": "The Bandgap Reference",
+      "title": "The bandgap principle",
+      "bullets": [
+        "V_{BE} falls by about 2 mV/K (CTAT)",
+        "ΔV_{BE} of two current densities rises with T (PTAT): V_{T}·ln N",
+        "Sum V_{BE} + K·ΔV_{BE} ≈ 1.25 V is flat at room temperature",
+        "Rule of thumb: about 60 mV per decade of current ratio"
+      ],
+      "rule": "V_{BG} = V_{BE} + K·V_{T}·ln N ≈ 1.25 V",
+      "figure": "the-bandgap-principle-1.png",
+      "falstad": [
+        {"name": "delta_vbe", "hint": "1× vs 8× area at the same current: ΔV_BE ≈ 53.8 mV"}
+      ],
+      "notes": "k/q = 86.2 µV/K; with N = 8, ΔV_BE = 53.5 mV at 25 °C and +0.179 mV/K. I_S cancels, so ΔV_BE depends only on T and N. Falstad has no temperature, but the room-temperature ΔV_BE can be measured."
+    },
+    {
+      "type": "example",
+      "section": "The Bandgap Reference",
+      "title": "Falstad: Brokaw bandgap cell",
+      "figure": "the-brokaw-cell-1.png",
+      "falstad": [
+        {"name": "brokaw_cell", "hint": "Check equal collectors (4.47 V) and 53.8 mV across R2"}
+      ],
+      "observe": [
+        "Op-amp forces equal collector currents; ΔV_{BE} appears across R_{2}",
+        "R_{1} carries both currents: V_{E} = 2·(R_{1}/R_{2})·V_{T}·ln 8",
+        "V_{BG} = V_{BE2} + V_{E} = 0.520 V + 0.602 V = 1.122 V"
+      ],
+      "notes": "K = 2R_1/R_2 = 11.2 makes the PTAT part rise by +2.0 mV/K, cancelling V_BE. Falstad gives 1.122 V instead of 1.25 V because of its transistor model. Exercise 4.3."
+    },
+    {
+      "type": "points",
+      "section": "Shunt and Series References",
+      "title": "Adjustable shunt reference TL431",
+      "bullets": [
+        "Error amplifier compares REF with an internal 2.5 V bandgap",
+        "Shunt conducts until V_{REF} = 2.495 V; cathode current 1–100 mA",
+        "Capstone: R_{1} = 12 kΩ, R_{2} = 20 kΩ → 2.5 V·1.6 = 4.00 V",
+        "I_{REF}·R_{1} adds about 24 mV: use smaller resistors or trim"
+      ],
+      "rule": "V_{out} = V_{REF}·(1 + R_{1}/R_{2}) + I_{REF}·R_{1}",
+      "figure": "the-adjustable-shunt-reference-tl431-1.png",
+      "falstad": [
+        {"name": "shunt_ref", "hint": "Supply 6 V or 12 V: cathode stays at 4.00 V, REF at 2.50 V"}
+      ],
+      "notes": "Show the behavioural model inside the TL431 (op-amp, 2.5 V source, transistor). R_V must deliver I_K,min plus load and divider current at the lowest supply. Exercise 4.4."
+    },
+    {
+      "type": "compare",
+      "section": "Shunt and Series References",
+      "title": "Shunt or series reference?",
+      "left": {
+        "head": "Shunt (TL431, LM4040)",
+        "bullets": [
+          "Two terminals, any supply above V_{out}",
+          "Can serve as negative reference",
+          "R_{V} wastes I_{min} + I_{L,max} all the time"
+        ]
+      },
+      "right": {
+        "head": "Series (REF50xx, ADR4xx)",
+        "bullets": [
+          "Three terminals, 0.1–1 mA quiescent",
+          "Better for varying loads and batteries",
+          "Needs V_{in} > V_{out} + V_{dropout}"
+        ]
+      },
+      "figure": null,
+      "notes": "Both types need decoupling exactly as in the data sheet: some are unstable with the wrong capacitor."
+    },
+    {
+      "type": "example",
+      "section": "Buffering and Scaling a Reference",
+      "title": "Falstad: a divider is no reference",
+      "figure": null,
+      "falstad": [
+        {"name": "ref_divider_loaded", "hint": "10k/40k at 5 V: 4.00 V open, 2.00 V with the 8 kΩ ladder"},
+        {"name": "ref_buffer_ladder", "hint": "2.5 V × 1.6 = 4.00 V at the ladder top, taps every 0.5 V"}
+      ],
+      "observe": [
+        "Divider source resistance 8 kΩ equals the ladder: voltage halves",
+        "A follower restores 4.00 V: input current ≈ 0, output resistance ≈ 0",
+        "Non-inverting amplifier scales and buffers in one step"
+      ],
+      "notes": "This is the capstone reference for the 3-bit flash converter: 4.00 V on 8 × 1 kΩ, 0.5 mA ladder current. Exercise 4.5."
+    },
+    {
+      "type": "recipe",
+      "section": "Buffering and Scaling a Reference",
+      "title": "Design recipe: reference for an ADC ladder",
+      "steps": [
+        "Full scale and LSB: LSB = V_{FS}/2^{N} (4.00 V, 3 bit: 0.5 V)",
+        "Ladder current I = V_{FS}/(2^{N}·R) (8 × 1 kΩ: 0.5 mA)",
+        "Gain G = V_{FS}/V_{R} from a standard reference (2.5 V: G = 1.6)",
+        "R_{F}/R_{G} = G − 1, R_{F} + R_{G} ≫ ladder (12 kΩ + 20 kΩ)",
+        "Check op-amp current, resistor tolerance, G·V_{offset}; decouple the top"
+      ],
+      "figure": null,
+      "notes": "Resistor tolerance enters with (G−1)/G: 1 % resistors give ±0.75 %, about ±30 mV, irrelevant for 3 bit but 30 LSB at 12 bit. Decouple the ladder top with 100–1000 nF close to the comparators."
+    },
+    {
+      "type": "points",
+      "section": "Ratiometric Measurement",
+      "title": "Ratiometric measurement",
+      "bullets": [
+        "Feed sensor divider and ADC ladder from the same V_{ref}",
+        "The code then depends only on resistor ratios, not on V_{ref}",
+        "Sensor from a fixed 4.00 V, ladder from V_{ref}: 10 % error flips a code",
+        "Works only with the same voltage at the same time on both paths"
+      ],
+      "rule": "code = 2^{N}·R_{S}/(R_{1} + R_{S}), independent of V_{ref}",
+      "figure": null,
+      "falstad": [
+        {"name": "ratiometric", "hint": "VREF slider 4.0 → 3.6 V: left stays code 2, right jumps to 3"}
+      ],
+      "notes": "Two 2-bit flash converters with a 1 kΩ/2.7 kΩ sensor divider, V_in = 0.730·V_exc. A shared connection with voltage drops, or noise on one path only, breaks the cancellation. Exercise 4.6."
+    },
+    {
+      "type": "points",
+      "section": "Error Budget",
+      "title": "Error budget of the 4.00 V reference",
+      "bullets": [
+        "Initial 0.20 %, TC 25 ppm/K over ±25 K 0.06 %, resistors 0.08 %",
+        "Op-amp offset 0.04 %, long-term drift 0.01 %",
+        "Worst case 0.39 %, RSS 0.23 %",
+        "3 bit (LSB 12.5 %): no problem; 12 bit: 16 LSB → calibrate"
+      ],
+      "rule": "Worst case = sum of all errors, RSS = √(sum of squares)",
+      "figure": null,
+      "falstad": [],
+      "notes": "Compare the budget with the LSB of the converter. After calibration only drift remains: 25 ppm/K over 25 K is still 2.6 LSB at 12 bit (Exercise 4.6). Alternatively measure ratiometrically."
+    }
+  ],
+  "exercises": [
+    "Exercise 4.1: Zener reference with series resistor",
+    "Exercise 4.2: Zener with current-source feed",
+    "Exercise 4.3: Bandgap design",
+    "Exercise 4.4: TL431 set to 4.00 V",
+    "Exercise 4.5: Reference for the 3-bit flash converter",
+    "Exercise 4.6: Ratiometric measurement and error budget"
+  ]
+}

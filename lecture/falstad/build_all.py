@@ -26,7 +26,7 @@ sys.path.insert(0, os.path.join(HERE, "circuits"))
 
 from falstad import Sim  # noqa: E402
 
-ORDER = ["basics", "sources", "references", "bridges", "opamps", "filters",
+ORDER = ["basics", "opampbasics", "sources", "references", "bridges", "opamps", "filters",
          "samplehold", "adc", "capstone"]
 
 

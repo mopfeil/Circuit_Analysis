@@ -1,4 +1,4 @@
-"""Falstad examples for chapter 5: Operational Amplifiers."""
+"""Falstad examples for chapter 6: Operational Amplifiers."""
 import numpy as np
 
 from falstad import Circuit, Sim
