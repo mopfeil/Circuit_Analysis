@@ -53,6 +53,12 @@
 
 \vspace*{3mm}
 {\Large\color{rwucyandark} Slides to the lecture}
+% single-chapter build (make chapters): \onlychaptertitle comes from the aux file
+\ifdefined\onlychaptertitle
+
+\vspace*{3mm}
+{\Large\bfseries\color{rwuviolet} \onlychaptertitle}
+\fi
 
 \vspace*{6mm}
 {\large Prof. Dr. Markus Pfeil}

@@ -185,7 +185,7 @@ A new chapter also needs its Falstad module in `ORDER` of
 ```
 make falstad          all examples (python3, numpy)
 make ch CH=Bridges    one chapter -> build/ch-Bridges-script.pdf / -slides.pdf
-make chapters         script split by chapter -> pdf/chapters/
+make chapters         script and slides split by chapter -> pdf/chapters/
 make                  everything: docu.pdf, docu_students.pdf, slides.pdf
 ```
 

@@ -70,22 +70,36 @@
   {
    "type": "points",
    "section": "Half and Full Bridges: Strain Gauges",
-   "title": "Strain gauges: quarter, half, full bridge",
+   "title": "Quarter, half, full bridge",
    "bullets": [
-    "Gauge factor k ≈ 2: x = k·ε; 1000 µm/m gives only 0.2 % ΔR",
-    "Quarter: V_{d} ≈ V_{B}·x/4, half: V_{B}·x/2, full: V_{B}·x",
-    "Half and full bridge are exactly linear: the leg current stays constant",
-    "Temperature changes all gauges equally: compensated"
+    "Quarter: 1 gauge, V_{d} ≈ V_{B}·x/4, slightly nonlinear",
+    "Half: 2 gauges in adjacent arms, V_{d} = V_{B}·x/2, linear",
+    "Full: 4 gauges, V_{d} = V_{B}·x, linear, most signal"
    ],
-   "rule": null,
-   "figure": null,
+   "rule": "x = ΔR/R = k·ε, gauge factor k ≈ 2",
+   "figure": "quarter-half-and-full-bridge-1.png",
+   "falstad": [],
+   "notes": "Gauges on top of a bending beam are stretched, on the bottom compressed; put them in adjacent arms. The leg current stays constant in half and full bridges, so they are linear. In a quarter bridge a dummy gauge gives the temperature compensation. Half and full bridge: temperature changes all gauges equally and cancels."
+  },
+  {
+   "type": "points",
+   "section": "Half and Full Bridges: Strain Gauges",
+   "title": "Example: 350 Ω gauges, ε = 1000 µm/m, V_{B} = 5 V",
+   "bullets": [
+    "x = k·ε = 0.002, ΔR = 0.7 Ω",
+    "Quarter 2.50 mV, half 5.00 mV, full 10.0 mV",
+    "Gain for 2 V: quarter 800, half 400, full 200",
+    "Use: quarter for one sensor (Pt100), half on a bending beam, full in load cells"
+   ],
+   "rule": "Twice the active gauges, twice the signal",
+   "figure": "where-the-gauges-sit-bending-beam-1.png",
    "falstad": [
     {
      "name": "bridge_types",
      "hint": "Compare the three voltmeters: 2.50 mV, 5.00 mV, 10.0 mV"
     }
    ],
-   "notes": "Gauges on top of a bending beam are stretched, on the bottom compressed; put them in adjacent arms. Load cells of scales are full bridges. In a quarter bridge a dummy gauge gives the temperature compensation. Exercise 5.2."
+   "notes": "Top gauges stretched (R2, R3: R(1+x)), bottom compressed (R1, R4: R(1−x)). Stretched gauges go into one diagonal, compressed into the other, so the effects add. Less gain means less amplified noise and offset. Exercise 5.2."
   },
   {
    "type": "points",

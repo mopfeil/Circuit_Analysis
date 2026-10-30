@@ -66,6 +66,23 @@ def clusters_of(page):
                     merged = True
                     break
         clusters.append(r)
+    # narrow drawings of the same height side by side (e.g. three small
+    # bridges in a row) are one figure, even with a wider gap
+    merged = True
+    while merged:
+        merged = False
+        for a in clusters:
+            for b in clusters:
+                if a is not b and min(a.width, b.width) < 60 \
+                        and abs(a.y0 - b.y0) < 4 and abs(a.y1 - b.y1) < 4 \
+                        and (a + (-90, 0, 90, 0)).intersects(b):
+                    clusters.remove(a)
+                    clusters.remove(b)
+                    clusters.append(a | b)
+                    merged = True
+                    break
+            if merged:
+                break
     return [c for c in clusters
             if c.width * c.height >= 2500 and c.width >= 60 and c.height >= 30]
 

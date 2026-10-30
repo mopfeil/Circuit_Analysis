@@ -38,8 +38,8 @@ make script     only the script (with solutions)
 make students   the script without solutions
 make slides     only the slides
 make ch CH=ADC  one chapter -> build/ch-ADC-script.pdf, build/ch-ADC-slides.pdf
-make chapters   the script split by chapter -> pdf/chapters/CircuitDesign_NN_<File>.pdf
-                (and ..._Students.pdf without solutions)
+make chapters   script and slides split by chapter -> pdf/chapters/CircuitDesign_NN_<File>.pdf
+                (script), ..._Students.pdf (without solutions), ..._Slides.pdf
 make pptx       condensed PowerPoint deck -> pdf/CircuitDesign_Slides_Practical.pptx
 make publish    build everything (incl. chapters) and copy the PDFs into pdf/
 make clean      remove LaTeX build artifacts

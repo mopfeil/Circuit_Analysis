@@ -187,6 +187,57 @@ alters all four gauges by the same factor and leaves the ratios, and thus
 the output, unchanged. In a quarter bridge the same effect is obtained with
 an unstrained \emph{dummy gauge} on the same material as $R_4$.}
 \os{\newpage}
+% slides only: where the gauges sit, and the three bridges compared with
+% the numbers of exercise "Strain gauge bridge" (falstad bridge_types)
+\os{%
+\item[{\rot\bf Where the gauges sit: bending beam}]~\\[-\lblskip]
+\begin{center}
+\begin{tikzpicture}[scale=0.9]
+  \foreach \yy in {-0.9,-0.6,...,1.2} \draw[rwugray] (-0.4,\yy) -- (0,\yy+0.3);
+  \draw[thick] (0,-0.9) -- (0,1.5);
+  \draw[thick, fill=rwugray!15] (0,0) rectangle (11,0.6);
+  \draw[-{Latex[length=3mm]}, very thick, rwuviolet] (10.6,1.9) -- (10.6,0.7) node[pos=0.4, left]{$F$};
+  \foreach \xx/\lab in {1.4/R_2, 3.0/R_3} {
+    \fill[rwucyandark] (\xx,0.6) rectangle (\xx+0.9,0.75);
+    \node[above] at (\xx+0.45,0.75) {$\lab$};}
+  \foreach \xx/\lab in {1.4/R_1, 3.0/R_4} {
+    \fill[rwuviolet] (\xx,-0.15) rectangle (\xx+0.9,0);
+    \node[below] at (\xx+0.45,-0.15) {$\lab$};}
+  \node[right, rwucyandark] at (4.4,0.95) {stretched: $R(1{+}x)$};
+  \node[right, rwuviolet] at (4.4,-0.35) {compressed: $R(1{-}x)$};
+\end{tikzpicture}
+\end{center}
+\bi
+	\ite strain $\varepsilon = \Delta l/l$, gauge factor $k \approx 2$: \quad $x = \Delta R/R = k\,\varepsilon$
+	\ite top and bottom see the same strain with opposite sign
+	\ite stretched gauges into one diagonal ($R_2$, $R_3$), compressed into the other ($R_1$, $R_4$): the effects add up
+	\ite half bridge: $R_1$, $R_2$ only \quad full bridge: all four
+\ei
+\newpage
+\item[{\rot\bf Example: quarter, half or full bridge?}]~\\[-\lblskip]
+\bi
+	\ite $R = \SI{350}{\ohm}$, $k = 2$, $\varepsilon = \SI{1000}{\micro\metre/\metre}$, $V_B = \SI{5}{\volt}$: \quad $x = 0.002$, $\Delta R = \SI{0.7}{\ohm}$
+\ei
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+ & quarter & half & full \\
+\midrule
+active gauges & 1 & 2 (adjacent arms) & 4 \\
+output $V_d$ & $\approx\frac{V_B}{4}\,x$ & $\frac{V_B}{2}\,x$ & $V_B\,x$ \\
+example & \SI{2.50}{\milli\volt} & \SI{5.00}{\milli\volt} & \SI{10.0}{\milli\volt} \\
+linearity & error $\approx -x/2$ & exact & exact \\
+temperature & dummy gauge needed & compensated & compensated \\
+typical use & one sensor (Pt100) & bending beam & load cell, scale \\
+\bottomrule
+\end{tabular}
+\end{center}
+\bi
+	\ite twice the active gauges, twice the signal: less gain, less amplified noise
+	\ite gain for \SI{2}{\volt}: quarter 800, half 400, full 200
+\ei
+\falstad{bridge_types}
+\newpage}
 \end{description}
 
 \exercise{Strain gauge bridge}

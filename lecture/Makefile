@@ -1,6 +1,6 @@
 # Build the lecture script (docu.pdf), the script without solutions
-# (docu_students.pdf), the slides (slides.pdf), one script PDF per
-# chapter (pdf/chapters/, "make chapters") and the condensed PowerPoint
+# (docu_students.pdf), the slides (slides.pdf), one script and one slide
+# PDF per chapter (pdf/chapters/, "make chapters") and the condensed PowerPoint
 # deck (pdf/CircuitDesign_Slides_Practical.pptx, "make pptx").
 # Requires TeX Live with latexmk and lualatex, and python3 with numpy for
 # the Falstad examples. The RWU font Barlow Semi Condensed is shipped in
@@ -34,8 +34,9 @@ ch:
 	$(LATEXMK) -outdir=build -jobname=ch-$(CH)-script -usepretex='\def\onlychapter{$(CH)}' docu.tex
 	$(LATEXMK) -outdir=build -jobname=ch-$(CH)-slides -usepretex='\def\onlychapter{$(CH)}' slides.tex
 
-# The script split into one PDF per chapter, with and without solutions:
-# pdf/chapters/CircuitDesign_<NN>_<File>.pdf and ..._Students.pdf
+# Script and slides split into one PDF per chapter:
+# pdf/chapters/CircuitDesign_<NN>_<File>.pdf (script), ..._Students.pdf
+# (script without solutions) and ..._Slides.pdf
 # (chapter list and order from text.tex)
 CHAPTERS := $(shell sed -n 's/^\\chap{[^}]*}{\([^}]*\)}.*/\1/p' text.tex)
 
@@ -45,8 +46,10 @@ chapters:
 	  n=$$((n+1)); nn=$$(printf %02d $$n); \
 	  $(LATEXMK) -outdir=build -jobname=ch-$$c-script -usepretex="\def\onlychapter{$$c}" docu.tex && \
 	  $(LATEXMK) -outdir=build -jobname=ch-$$c-students -usepretex="\def\onlychapter{$$c}\def\nosolutions{}" docu.tex && \
+	  $(LATEXMK) -outdir=build -jobname=ch-$$c-slides -usepretex="\def\onlychapter{$$c}" slides.tex && \
 	  cp build/ch-$$c-script.pdf pdf/chapters/CircuitDesign_$${nn}_$$c.pdf && \
-	  cp build/ch-$$c-students.pdf pdf/chapters/CircuitDesign_$${nn}_$${c}_Students.pdf || exit 1; \
+	  cp build/ch-$$c-students.pdf pdf/chapters/CircuitDesign_$${nn}_$${c}_Students.pdf && \
+	  cp build/ch-$$c-slides.pdf pdf/chapters/CircuitDesign_$${nn}_$${c}_Slides.pdf || exit 1; \
 	done
 
 # Condensed PowerPoint deck: practical points and all Falstad examples,
