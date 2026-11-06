@@ -15,3 +15,9 @@ build/
 __pycache__/
 *.pyc
 pptx/.venv/
+
+# portfolio assignments with solutions: never push
+portfolio/
+
+# exam with solutions: never push
+exam/

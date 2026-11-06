@@ -12,7 +12,7 @@ else
 LATEXMK = latexmk -lualatex -interaction=nonstopmode -halt-on-error
 endif
 
-.PHONY: all script students slides falstad ch chapters pptx publish sync clean
+.PHONY: all script students slides falstad ch chapters pptx publish sync clean portfolio
 
 all: falstad script students slides
 
@@ -91,6 +91,14 @@ sync:
 	rsync -a --delete --exclude-from=.gitignore ./ $(SYNC_DIR)/lecture/
 	$(SYNC_GIT) add -A lecture
 	$(SYNC_GIT) diff --cached --quiet || { $(SYNC_GIT) commit -m "$(MSG)" && $(SYNC_GIT) push; }
+
+# Portfolio assignments (portfolio/ is not synced, see .gitignore)
+portfolio:
+	python3 portfolio/falstad_portfolio.py
+	$(LATEXMK) -outdir=portfolio portfolio/Portfolio.tex
+	$(LATEXMK) -outdir=portfolio -jobname=Portfolio_Students -usepretex='\def\nosolutions{}' portfolio/Portfolio.tex
+	$(LATEXMK) -outdir=portfolio portfolio/Portfolio_DE.tex
+	$(LATEXMK) -outdir=portfolio -jobname=Portfolio_DE_Students -usepretex='\def\nosolutions{}' portfolio/Portfolio_DE.tex
 
 clean:
 	latexmk -c docu.tex slides.tex
