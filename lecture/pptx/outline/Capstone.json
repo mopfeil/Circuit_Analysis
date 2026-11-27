@@ -1,7 +1,7 @@
 {
  "chapter": "From Sensor to Digital Value",
  "file": "Capstone",
- "number": 10,
+ "number": 11,
  "subtitle": "The whole course in one chain: Pt100 thermometer to 3-bit code on LEDs",
  "takeaways": [
   "One 4 V reference for bridge and ladder: ratiometric",
@@ -22,7 +22,7 @@
    "rule": null,
    "figure": "five-stages-from-sensor-to-code-1.png",
    "falstad": [],
-   "notes": "Bridge from chapter Bridge Circuits, INA from Operational Amplifiers, low-pass from Active Filters, S&H from Sample and Hold, flash ADC from the previous chapter, LED resistor from Basics. This chapter is the worked solution of Exercise 10.1."
+   "notes": "Bridge from chapter Bridge Circuits, INA from Operational Amplifiers, low-pass from Active Filters, S&H from Sample and Hold, flash ADC from the previous chapter, LED resistor from Basics. This chapter is the worked solution of Exercise 11.1."
   },
   {
    "type": "points",
@@ -54,7 +54,7 @@
    "rule": "V_{COND} = G_{1}·G_{2}·V_{BR},  G_{1}·G_{2} = 107.6",
    "figure": "instrumentation-amplifier-and-gain-stage-1.png",
    "falstad": [],
-   "notes": "Ratiometric: if the reference is 1 % high, bridge output and ADC thresholds are both 1 % high, the code does not change (Exercise 10.2). Trim: set 100 Ω and check 0 V, then 138.5 Ω and adjust R_F for 4.00 V."
+   "notes": "Ratiometric: if the reference is 1 % high, bridge output and ADC thresholds are both 1 % high, the code does not change (Exercise 11.2). Trim: set 100 Ω and check 0 V, then 138.5 Ω and adjust R_F for 4.00 V."
   },
   {
    "type": "points",
@@ -69,7 +69,7 @@
    "rule": "Residual = V_{peak}/√(1 + (f/f_{c})^{2}) < ½ LSB",
    "figure": "anti-aliasing-low-pass-1.png",
    "falstad": [],
-   "notes": "For 3 bits a first-order filter is enough. For 10 bit the residual would be twelve times too large: then use 2nd or 3rd order, oversampling, or a sampling rate that is not a sub-multiple of 50 Hz (Exercise 10.3)."
+   "notes": "For 3 bits a first-order filter is enough. For 10 bit the residual would be twelve times too large: then use 2nd or 3rd order, oversampling, or a sampling rate that is not a sub-multiple of 50 Hz (Exercise 11.3)."
   },
   {
    "type": "compare",
@@ -92,7 +92,7 @@
     ]
    },
    "figure": null,
-   "notes": "Clock 5 Hz with 10 % duty: 20 ms track, 180 ms hold. Both limits leave a wide range, 10 nF to 100 µF; choose a 1 µF film capacitor. Exercise 10.5 redoes this with R_on = 1 kΩ and 10 nA."
+   "notes": "Clock 5 Hz with 10 % duty: 20 ms track, 180 ms hold. Both limits leave a wide range, 10 nF to 100 µF; choose a 1 µF film capacitor. Exercise 11.5 redoes this with R_on = 1 kΩ and 10 nA."
   },
   {
    "type": "points",
@@ -108,7 +108,7 @@
    "rule": null,
    "figure": null,
    "falstad": [],
-   "notes": "Same converter as in the ADC chapter, Falstad example flash3. The full encoder equation for B0 is in section Stages 4 and 5. Exercise 10.4 extends it to four bits."
+   "notes": "Same converter as in the ADC chapter, Falstad example flash3. The full encoder equation for B0 is in section Stages 4 and 5. Exercise 11.4 extends it to four bits."
   },
   {
    "type": "example",
@@ -158,14 +158,14 @@
     "Size C_{H} between droop and charging limits; verify at bin centres"
    ],
    "figure": null,
-   "notes": "This is the procedure behind the capstone task, Exercise 10.1. Students should do the paper design first and then check every stage against the Falstad model."
+   "notes": "This is the procedure behind the capstone task, Exercise 11.1. Students should do the paper design first and then check every stage against the Falstad model."
   }
  ],
  "exercises": [
-  "Exercise 10.1: From sensor to digital value (capstone task 2025/26)",
-  "Exercise 10.2: Ratiometric measurement",
-  "Exercise 10.3: Another sampling rate",
-  "Exercise 10.4: Four bits",
-  "Exercise 10.5: Hold capacitor at the limits"
+  "Exercise 11.1: From sensor to digital value (capstone task 2025/26)",
+  "Exercise 11.2: Ratiometric measurement",
+  "Exercise 11.3: Another sampling rate",
+  "Exercise 11.4: Four bits",
+  "Exercise 11.5: Hold capacitor at the limits"
  ]
 }

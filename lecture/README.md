@@ -25,9 +25,11 @@ example circuit also exists as a Falstad simulation.
 5. Bridge Circuits
 6. Operational Amplifiers
 7. Active Filters
-8. Sample and Hold
-9. Analog-to-Digital Conversion
-10. From Sensor to Digital Value (capstone: complete chain from a Pt100 bridge to a 3-bit code)
+8. Noise and Interference (thermal, shot and 1/f noise; capacitive and magnetic coupling,
+   ground loops, shared returns, supply ripple, thermal EMF; error budget of the capstone)
+9. Sample and Hold
+10. Analog-to-Digital Conversion
+11. From Sensor to Digital Value (capstone: complete chain from a Pt100 bridge to a 3-bit code)
 
 ## Build
 

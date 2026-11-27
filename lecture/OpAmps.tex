@@ -645,9 +645,9 @@ with 8 codes over \SI{4}{\volt} one LSB is \SI{0.5}{\volt}.\newpage}
   \node[blk, fill=rwucyan!10] (b) {Pt100\\bridge};
   \node[blk, fill=rwuviolet!15, right=9mm of b] (i) {2 buffers +\\diff.\ amp\\$G_1=10$};
   \node[blk, fill=rwuviolet!15, right=9mm of i] (g) {gain stage\\$G_2=10.76$\\trim};
-  \node[blk, fill=rwucyan!10, right=9mm of g] (f) {low-pass\\\SI{2.34}{\hertz}\\(ch.~6)};
-  \node[blk, fill=rwucyan!10, right=9mm of f] (s) {S\&H\\(ch.~7)};
-  \node[blk, fill=rwucyan!10, right=9mm of s] (a) {3-bit\\flash ADC\\(ch.~8)};
+  \node[blk, fill=rwucyan!10, right=9mm of g] (f) {low-pass\\\SI{2.34}{\hertz}\\(ch.~\ref{ch:Filters})};
+  \node[blk, fill=rwucyan!10, right=9mm of f] (s) {S\&H\\(ch.~\ref{ch:SampleHold})};
+  \node[blk, fill=rwucyan!10, right=9mm of s] (a) {3-bit\\flash ADC\\(ch.~\ref{ch:ADC})};
   \draw[->, thick] (b) -- node[above, font=\scriptsize]{0..37\,mV} (i);
   \draw[->, thick] (i) -- (g);
   \draw[->, thick] (g) -- node[above, font=\scriptsize]{0..4\,V} (f);

@@ -22,6 +22,8 @@ Element formats follow CircuitJS (github.com/pfalstad/circuitjs1, 2026):
     c x1 y1 x2 y2 0 C vdiff                 capacitor
     g x1 y1 x2 y2 0 0                       ground (post = point 1)
     v x1 y1 x2 y2 0 wf f Vmax bias phase duty   source, point 2 = plus
+                                            (wf 6 = noise: uniform in
+                                            bias +- Vmax, new every step)
     R x1 y1 x2 y2 0 wf f Vmax bias phase duty   rail, post = point 1
     i x1 y1 x2 y2 0 I                       current source, I leaves at point 2
     d / z / 162                             diode / zener / LED, anode = point 1
@@ -268,7 +270,7 @@ class Circuit:
     @staticmethod
     def _wave(waveform, freq, vmax, bias, phase, duty):
         wf = {"dc": 0, "ac": 1, "square": 2, "triangle": 3,
-              "sawtooth": 4, "pulse": 5}[waveform]
+              "sawtooth": 4, "pulse": 5, "noise": 6}[waveform]
         return [wf, float(freq), float(vmax), float(bias), float(phase),
                 float(duty)]
 
@@ -360,10 +362,12 @@ class Circuit:
     def box(self, p1, p2):
         return self.add(Elm("b", p1, p2, 0))
 
-    def scope(self, elms, speed=64, vscale=5.0, position=None):
-        """Scope showing the voltages of one-terminal elements (labels)."""
+    def scope(self, elms, speed=64, vscale=5.0, position=None, rms=False):
+        """Scope showing the voltages of one-terminal elements (labels).
+        rms=True also displays the RMS value (scope flag 16384)."""
         self.scopes.append((list(elms), speed, vscale,
-                            len(self.scopes) if position is None else position))
+                            len(self.scopes) if position is None else position,
+                            4098 | (16384 if rms else 0)))
 
     def slider(self, elm, vmin, vmax, text, item=0):
         self.sliders.append((elm, item, vmin, vmax, text))
@@ -374,11 +378,11 @@ class Circuit:
         lines = ["$ %d %g %g %d %g 50 5e-11" % (flags, self.timestep, self.speed,
                                                 self.current_bar, self.voltage_range)]
         lines += [e.dump() for e in self.elms]
-        for elms, speed, vscale, pos in self.scopes:
+        for elms, speed, vscale, pos, sflags in self.scopes:
             first = elms[0].index
             rest = " ".join("%d 0" % e.index for e in elms[1:])
-            lines.append(("o %d %d 0 4098 %g 0.1 %d %d %s" %
-                          (first, speed, vscale, pos, len(elms), rest)).strip())
+            lines.append(("o %d %d 0 %d %g 0.1 %d %d %s" %
+                          (first, speed, sflags, vscale, pos, len(elms), rest)).strip())
         for elm, item, vmin, vmax, text in self.sliders:
             lines.append("38 %d F0 %d %g %g %s" % (elm.index, item, vmin, vmax,
                                                     text.replace(" ", "\\s")))
@@ -429,16 +433,21 @@ def _wave_value(params, t):
         return bias + (w % (2 * math.pi)) * (vmax / math.pi) - vmax
     if wf == 5:
         return bias + (vmax if (w % (2 * math.pi)) < 1 else 0)
+    if wf == 6:
+        raise ValueError("noise waveform needs the element state")
     raise ValueError("waveform %d not simulated" % wf)
 
 
 class Sim:
     """Transient simulation of a Circuit (subset of CircuitJS elements)."""
 
-    def __init__(self, circuit, dt=None):
+    def __init__(self, circuit, dt=None, seed=1):
         self.c = circuit
         self.dt = dt or circuit.timestep
         self.t = 0.0
+        # noise sources (waveform 6): as in CircuitJS (VoltageElm.stepFinished)
+        # a new value, uniform in bias +- Vmax, is drawn after every time step
+        self.rng = np.random.default_rng(seed)
         self._build()
 
     # ---- topology ---------------------------------------------------------
@@ -487,6 +496,8 @@ class Sim:
             if k in ("v", "R", "a", "I", "150", "151", "152", "153", "154"):
                 it["vs"] = len(self.vs)
                 self.vs.append(it)
+            if k in ("v", "R") and int(e.params[0]) == 6:
+                it["noise"] = 0.0           # CircuitJS starts with 0 as well
             if k == "c":
                 it["v"] = e.params[1]
                 it["i"] = 0.0
@@ -623,9 +634,11 @@ class Sim:
                 g(n[0], n[1], geq)
                 isrc(n[0], n[1], ieq)
             elif k in ("v",):
-                vsrc(n[0], n[1], it["vs"], _wave_value(e.params, t))
+                vsrc(n[0], n[1], it["vs"],
+                     it["noise"] if "noise" in it else _wave_value(e.params, t))
             elif k == "R":
-                vsrc(-1, n[0], it["vs"], _wave_value(e.params, t))
+                vsrc(-1, n[0], it["vs"],
+                     it["noise"] if "noise" in it else _wave_value(e.params, t))
             elif k == "i":
                 isrc(n[0], n[1], e.params[0])
             elif k == "159":
@@ -789,6 +802,9 @@ class Sim:
                 geq = 2 * C / self.dt
                 it["i"] = geq * (vnew - it["v"]) - it["i"]
                 it["v"] = vnew
+            elif "noise" in it:
+                _wf, _f, vmax, bias = it["e"].params[:4]
+                it["noise"] = (self.rng.random() * 2 - 1) * vmax + bias
         self.x = x
         self.t = t
 

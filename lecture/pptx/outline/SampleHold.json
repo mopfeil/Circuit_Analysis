@@ -1,7 +1,7 @@
 {
   "chapter": "Sample and Hold",
   "file": "SampleHold",
-  "number": 8,
+  "number": 9,
   "subtitle": "Freeze the filtered signal at a defined instant while the ADC converts",
   "takeaways": [
     "C_{H} window: droop sets the minimum, acquisition the max",
@@ -85,7 +85,7 @@
       "falstad": [
         {"name": "sh_acquisition", "hint": "4 V step: 2.53 V after τ, 3.75 V (½ LSB below) after 2.83 ms"}
       ],
-      "notes": "Use a time constant of a few percent of the track window; the rest is reserve for op-amp settling and tolerances. Derivation in section Designing the Hold Capacitor; Exercise 8.1."
+      "notes": "Use a time constant of a few percent of the track window; the rest is reserve for op-amp settling and tolerances. Derivation in section Designing the Hold Capacitor; Exercise 9.1."
     },
     {
       "type": "points",
@@ -115,7 +115,7 @@
         "1 µF: 3.00 V → 2.99 V, the right choice",
         "100 µF: only 18 % per sample, 1.88 V after five samples"
       ],
-      "notes": "The leakage is exaggerated to make droop visible. A too large capacitor turns the S&H into a low-pass filter. Exercise 8.2."
+      "notes": "The leakage is exaggerated to make droop visible. A too large capacitor turns the S&H into a low-pass filter. Exercise 9.2."
     },
     {
       "type": "recipe",
@@ -146,7 +146,7 @@
       "falstad": [
         {"name": "sh_pedestal", "hint": "2 V input: Vhold_1n drops to 1.9505 V, Vhold_100n to 1.9995 V"}
       ],
-      "notes": "Falstad models only the coupling capacitance, not the channel charge. Exercise 8.4."
+      "notes": "Falstad models only the coupling capacitance, not the channel charge. Exercise 9.4."
     },
     {
       "type": "points",
@@ -161,7 +161,7 @@
       "rule": "Full-scale sine: t_{j} < 1/(2π·f·2^{N})",
       "figure": null,
       "falstad": [],
-      "notes": "Jitter is why fast converters need clean clocks. For the 5 Hz capstone a millisecond of jitter is harmless, see Exercise 8.6."
+      "notes": "Jitter is why fast converters need clean clocks. For the 5 Hz capstone a millisecond of jitter is harmless, see Exercise 9.6."
     },
     {
       "type": "example",
@@ -176,7 +176,7 @@
         "Buffered: 3.000 V during the whole period",
         "Input buffer supplies the charge, output buffer draws none"
       ],
-      "notes": "The unbuffered circuit fails three ways: divider between source and load, slow charging, discharge through the load. Use a FET-input op-amp as output buffer; its bias current adds to I_{leak}. Exercise 8.3."
+      "notes": "The unbuffered circuit fails three ways: divider between source and load, slow charging, discharge through the load. Use a FET-input op-amp as output buffer; its bias current adds to I_{leak}. Exercise 9.3."
     },
     {
       "type": "example",
@@ -191,7 +191,7 @@
         "0.8 V > 1 LSB (0.5 V): consecutive samples skip codes",
         "Not an S&H error: the input is too fast for f_{s}"
       ],
-      "notes": "Clock rail: square, 5 Hz, 2.5 V amplitude, 2.5 V offset, duty cycle 0.1. Such fast signals must be removed by the anti-aliasing filter. Exercise 8.5."
+      "notes": "Clock rail: square, 5 Hz, 2.5 V amplitude, 2.5 V offset, duty cycle 0.1. Such fast signals must be removed by the anti-aliasing filter. Exercise 9.5."
     },
     {
       "type": "points",
@@ -210,11 +210,11 @@
     }
   ],
   "exercises": [
-    "Exercise 8.1: Choosing the hold capacitor for f_{s} = 5 Hz",
-    "Exercise 8.2: Droop and a too large capacitor",
-    "Exercise 8.3: Unbuffered sample and hold",
-    "Exercise 8.4: Pedestal error",
-    "Exercise 8.5: Ramp input and step size",
-    "Exercise 8.6: Aperture jitter"
+    "Exercise 9.1: Choosing the hold capacitor for f_{s} = 5 Hz",
+    "Exercise 9.2: Droop and a too large capacitor",
+    "Exercise 9.3: Unbuffered sample and hold",
+    "Exercise 9.4: Pedestal error",
+    "Exercise 9.5: Ramp input and step size",
+    "Exercise 9.6: Aperture jitter"
   ]
 }

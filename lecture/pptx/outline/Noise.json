@@ -1,0 +1,224 @@
+{
+  "chapter": "Noise and Interference",
+  "file": "Noise",
+  "number": 8,
+  "subtitle": "Where unwanted signals come from, how large they are, and how to keep them out",
+  "takeaways": [
+    "Noise: V_{rms} = e_{n}·√B — use only the bandwidth you need",
+    "Interference needs a path: break it (twist, shield, star ground, differential input)",
+    "Compare every disturbance with the LSB where it enters the chain"
+  ],
+  "slides": [
+    {
+      "type": "points",
+      "section": "Signal, Noise and Interference",
+      "title": "Noise, interference, drift",
+      "bullets": [
+        "Noise: random, made inside the parts (thermal, shot, 1/f)",
+        "Interference: a foreign signal through a coupling path (mains, regulator, LEDs)",
+        "Drift and offset: slow DC errors (thermal EMF, offset, self-heating)",
+        "Yardstick: 1 LSB = 4.65 mV at the bridge (3 bit), 9.1 µV with 12 bit",
+        "Bridge and INA input are critical: everything there is multiplied by 107.6"
+      ],
+      "rule": "Harmless if well below ½ LSB at the point where it enters",
+      "figure": "where-disturbances-enter-the-capstone-ch-1.png",
+      "falstad": [],
+      "notes": "Capstone numbers: full scale 37.18 mV at the bridge, 4.00 V at the ADC; 3-bit LSB 0.5 V = 12.5 K; 12-bit LSB 0.98 mV at the ADC. The chapter collects the disturbances of the earlier chapters (50 Hz in Bridges, offset in Operational Amplifiers, aliasing in Active Filters and ADC) in one framework."
+    },
+    {
+      "type": "points",
+      "section": "Describing Noise",
+      "title": "RMS value, density, bandwidth",
+      "bullets": [
+        "Gaussian noise: V_{rms} = σ, peak-to-peak ≈ 6.6 · V_{rms}",
+        "Noise density e_{n} in nV/√Hz; white noise: V_{rms} = e_{n}·√B",
+        "Noise bandwidth of a 1st-order low-pass: B_{n} = 1.57 · f_{c} (capstone: 3.68 Hz)",
+        "Independent sources add as root sum of squares — fix the largest one first"
+      ],
+      "rule": "V_{rms} = e_{n}·√B_{n},   V_{tot} = √(V_{1}^{2} + V_{2}^{2})",
+      "figure": "rms-value-and-peak-to-peak-value-1.png",
+      "falstad": [],
+      "notes": "Ten times the bandwidth gives √10 = 3.16 times the noise. A source three times smaller than the largest adds only 5 %. Correlated contributions (the same source twice, interference from the same mains) add linearly."
+    },
+    {
+      "type": "example",
+      "section": "Describing Noise",
+      "title": "Falstad: bandwidth and adding noise",
+      "figure": null,
+      "falstad": [
+        {
+          "name": "noise_bandwidth",
+          "hint": "Scopes show RMS: 0.577 V raw, 0.10 V at 995 Hz, 0.032 V at 99.5 Hz"
+        },
+        {
+          "name": "noise_rss",
+          "hint": "One source 0.577 V, two independent 0.82 V, one source doubled 1.15 V"
+        }
+      ],
+      "observe": [
+        "One tenth of the bandwidth: noise falls by √10 = 3.2",
+        "Two independent sources: √2, not 2 times the noise",
+        "Values change by a few percent on every run — it is noise"
+      ],
+      "notes": "Falstad's noise generator draws a new uniform value in ±1 V every time step (10 µs): white up to 50 kHz, density 2.58 mV/√Hz. Falstad does not simulate thermal noise of its resistors; the generator is scaled-up white noise. Exercise 8.1."
+    },
+    {
+      "type": "points",
+      "section": "Intrinsic Noise Sources",
+      "title": "Thermal and shot noise",
+      "bullets": [
+        "Thermal: random motion of electrons in every resistance, e_{n} = √(4kTR)",
+        "1 kΩ ≈ 4 nV/√Hz; capstone bridge (195 Ω): 1.8 nV/√Hz, 3.4 nV in 3.68 Hz",
+        "kT/C: sampled noise √(kT/C), 64 µV at 1 pF, independent of R",
+        "Shot: independent charges crossing a barrier, i_{n} = √(2qI)",
+        "Matters for small currents (photodiodes, op-amp bias currents, high R_{S})"
+      ],
+      "rule": "e_{n} = √(4kTR),   i_{n} = √(2qI)",
+      "figure": "kt-c-noise-sampling-freezes-thermal-nois-1.png",
+      "falstad": [],
+      "notes": "4kT = 1.66·10^{−20} J at 300 K. Only the real part of an impedance is noisy. A current through a metal resistor fed from a voltage source has no shot noise. Zener diodes above about 6 V make much more (avalanche) noise, one reason for bandgap references."
+    },
+    {
+      "type": "points",
+      "section": "Intrinsic Noise Sources",
+      "title": "1/f noise and the op-amp",
+      "bullets": [
+        "Below the corner f_{nc} the density rises as 1/√f; every decade adds the same",
+        "Our band (0.01 … 2.34 Hz) lies completely in the 1/f region",
+        "Op-amp model: e_{n} and i_{n} at the input, amplified by the noise gain",
+        "Low R_{S}: low e_{n} matters; high R_{S}: low i_{n} matters",
+        "Zero-drift (chopper) op-amps have no 1/f noise and µV offsets"
+      ],
+      "rule": "V_{rms} = e_{w}·√(f_{nc}·ln(f_{2}/f_{1}) + f_{2} − f_{1})",
+      "figure": "1-fnoise-flicker-noise-1.png",
+      "falstad": [],
+      "notes": "Example: 40 nV/√Hz, corner 100 Hz, 0.01 to 3.68 Hz gives 0.98 µV, 13 times the white-noise estimate. Capstone INA with zero-drift op-amps: about 100 nV/√Hz input-referred, 21 µV RMS at the ADC: 0.14 LSB peak-to-peak for 12 bit, nothing for 3 bit. Exercise 8.2."
+    },
+    {
+      "type": "points",
+      "section": "Coupling of Interference",
+      "title": "Capacitive coupling",
+      "bullets": [
+        "A voltage couples through stray capacitance into high-impedance nodes",
+        "Mains 325 V through 1 pF: 0.10 µA; voltage = current × node impedance",
+        "1 MΩ: 0.10 V; 10 kΩ: 1 mV; bridge tap (97.5 Ω): 10 µV",
+        "Remedies: low impedance, distance, grounded shield (one end, at the amplifier)"
+      ],
+      "rule": "v ≈ ωC_{S}·V_{S}·Z_{V}",
+      "figure": "capacitive-coupling-1.png",
+      "falstad": [
+        {
+          "name": "noise_cap_coupling",
+          "hint": "Compare V_1M, V_10k and the shielded node V_shield"
+        }
+      ],
+      "notes": "The low-ohmic bridge is robust against electric fields; an open input or a high-ohmic divider is not. A floating shield can make things worse. A shield does nothing against 50 Hz magnetic fields. Exercise 8.3."
+    },
+    {
+      "type": "points",
+      "section": "Coupling of Interference",
+      "title": "Magnetic coupling and twisted pair",
+      "bullets": [
+        "A current's field induces ωAB in every loop — in series with the sensor",
+        "It is a differential signal: the INA amplifies it like the measurement",
+        "10 A at 10 cm, 100 cm² loop: 89 µV; near a ballast: 5 mV (capstone)",
+        "Remedies: small loop, twisted pair, distance; the rest is low-pass filtered",
+        "RF is rectified by op-amp inputs: RC filter right at the INA inputs"
+      ],
+      "rule": "v = ω·A·B: reduce the loop area",
+      "figure": null,
+      "falstad": [
+        {
+          "name": "noise_mag_coupling",
+          "hint": "Wide loop 48.8 mV vs twisted pair 2.4 mV behind the INA (G = 10)"
+        }
+      ],
+      "notes": "Twisted pair: neighbouring twists induce voltages of opposite sign; a 10 % imbalance leaves 0.25 mV of 5 mV (−26 dB). Common mode (same on both wires) is rejected by the INA; differential mode is not. Unequal impedances on the two inputs convert common mode into differential mode."
+    },
+    {
+      "type": "points",
+      "section": "Grounding and Ground Loops",
+      "title": "Shared ground returns",
+      "bullets": [
+        "Ground is copper: a 10 cm trace has 0.16 Ω",
+        "50 mA of LED current through 0.1 Ω: 5 mV — one LSB at the bridge",
+        "In the ground of the gain stage: −9.76 × 5 mV = −49 mV at the output",
+        "It switches slowly: the anti-aliasing filter does not remove it",
+        "Remedies: star ground, separate analog/digital returns, ground plane"
+      ],
+      "rule": "Large currents never through the ground of the input stage",
+      "figure": "common-return-impedance-1.png",
+      "falstad": [
+        {
+          "name": "noise_shared_ground",
+          "hint": "Vout_shared steps 2.000 V → 1.951 V with the LEDs; Vout_star stays"
+        }
+      ],
+      "notes": "0.1 LSB for the 3-bit capstone, but 50 LSB with 12 bit. Ground connections must be designed, not left to the autorouter. Exercise 8.5 a)."
+    },
+    {
+      "type": "points",
+      "section": "Grounding and Ground Loops",
+      "title": "Ground loops",
+      "bullets": [
+        "Two earthed devices plus a cable ground form a loop",
+        "Earth points differ by 10 mV … 1 V (50 Hz): the loop current drops on the cable",
+        "Single-ended: the drop adds to the signal; differential: it is common mode",
+        "Break the loop: isolation, battery, shield at one end, ground-break resistor",
+        "Never remove protective earth"
+      ],
+      "rule": "Measure differentially or break the loop",
+      "figure": "ground-loops-1.png",
+      "falstad": [
+        {
+          "name": "noise_ground_loop",
+          "hint": "Single-ended: ±1 V hum; difference amp: none; with a 1 % resistor: 0.9 mV"
+        }
+      ],
+      "notes": "1 V between earth points, PE 4.5 Ω, cable ground 0.5 Ω: 200 mA, 0.1 V at the remote ground. CMRR of a difference amplifier with one resistor 1 % off: 61 dB; integrated INA 90 to 120 dB. Typical lab case: laptop via USB, scope ground clip, sensor housing earthed at the machine. Exercise 8.4."
+    },
+    {
+      "type": "example",
+      "section": "Supply and Reference Disturbances",
+      "title": "Falstad: supply filter and thermal EMF",
+      "figure": "rc-filter-for-the-analog-supply-1.png",
+      "falstad": [
+        {
+          "name": "noise_supply_filter",
+          "hint": "50 mV pp ripple at 100 kHz → 0.63 mV pp behind 10 Ω / 10 µF"
+        },
+        {
+          "name": "noise_thermal_emf",
+          "hint": "Voltmeters 18.70 mV and −18.66 mV: (V1−V2)/2 = V_d, (V1+V2)/2 = 20 µV"
+        }
+      ],
+      "observe": [
+        "RC filter: f_{c} = 1.6 kHz, 1/63 at 100 kHz; DC drop 10 mV at 1 mA",
+        "Reversing the excitation flips V_{d} but not the thermal EMF",
+        "Copper–Kovar junctions: 40 µV/K — keep junctions at equal temperature"
+      ],
+      "notes": "PSRR falls with frequency (often 20–40 dB at 100 kHz). Stages after the filter see their supply and reference unfiltered; the ratiometric reference cancels slow drift, not fast noise. Thermal EMF 20 µV = 0.05 K: nothing for 3 bit, 2.2 LSB for 12 bit. Exercise 8.5."
+    },
+    {
+      "type": "recipe",
+      "section": "Error Budget and Design Rules",
+      "title": "Design recipe: a quiet measurement front end",
+      "steps": [
+        "LSB at every point of the chain; each disturbance below ¼ LSB",
+        "Bandwidth: anti-aliasing filter before the S&H sets B_{n} = 1.57 f_{c}",
+        "First stage G ≥ 10, zero-drift for DC, metal-film resistors",
+        "Twisted pair, shield at the amplifier, INA with RC input filter",
+        "Star ground, no ground loops, 100 nF per IC, ratiometric reference"
+      ],
+      "figure": null,
+      "notes": "Capstone budget at the ADC: op-amp noise 0.14 mV pp, filtered 50 Hz 25 mV, LED ground error 49 mV, thermal EMF 2.2 mV, untrimmed offset 0.22 V. For 3 bit only the offset needs attention; for 12 bit everything does."
+    }
+  ],
+  "exercises": [
+    "Exercise 8.1: Thermal noise and bandwidth",
+    "Exercise 8.2: Noise of the capstone front end",
+    "Exercise 8.3: Capacitive coupling",
+    "Exercise 8.4: Ground loop and difference amplifier",
+    "Exercise 8.5: Shared ground and thermal EMF"
+  ]
+}
